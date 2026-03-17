@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Snip.ly — URL Shortener
+
+A URL shortener web application with a marketing landing page and a full link-management dashboard. Built as a polished frontend prototype — all data is mocked client-side, with clear `TODO` markers where real API calls should be wired in.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| UI | React 19 |
+| Styling | Tailwind CSS v4 |
+| Animations | Motion (Framer Motion) v12 |
+| Fonts | Geist Sans + Geist Mono |
+
+## Features
+
+- **Hero shortener** — paste a URL on the landing page and instantly get a `snip.ly/<code>` short link with one-click copy
+- **Dashboard** — manage all your links with search, sort, toggle active/inactive, delete, and copy-to-clipboard
+- **Create Link Modal** — custom slug support, URL validation, and a live `snip.ly/<slug>` preview
+- **Auth pages** — sign-in and sign-up forms with validation, password strength indicator, and loading states
+- **Animated stats bar** — count-up animation (1.2M links, 500M clicks, 50K users, 99.9% uptime) triggered on scroll
+- **Responsive Navbar** — scroll-aware frosted glass effect with a mobile hamburger menu
+- **Design system** — reusable `Button`, `Input`, `Modal`, `Badge`, and `CopyButton` primitives, all motion-animated
+
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Landing page — Hero, Features, How It Works, Stats, CTA |
+| `/auth/signin` | Sign-in form |
+| `/auth/signup` | Sign-up form |
+| `/dashboard` | Link management dashboard |
+| `*` | Animated 404 page |
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Description |
+|---|---|
+| `npm run dev` | Start local dev server |
+| `npm run build` | Production build |
+| `npm start` | Serve production build |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Planned API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+The following endpoints are marked with `TODO` comments and are ready to be implemented:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Method | Endpoint | Used by |
+|---|---|---|
+| `POST` | `/api/urls` | Landing hero shortener, Create Link Modal |
+| `POST` | `/api/auth/signin` | Sign-in page |
+| `POST` | `/api/auth/signup` | Sign-up page |
