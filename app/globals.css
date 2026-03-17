@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary:     #6366F1;
+  --color-secondary:   #8B5CF6;
+  --color-bg:          #0F172A;
+  --color-card:        #1E293B;
+  --color-fg:          #F8FAFC;
+  --color-text:        #F8FAFC;
+  --color-accent:      #22C55E;
+  --color-border:      #2D3F55;
+  --color-muted:       #64748B;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0F172A; }
+::-webkit-scrollbar-thumb { background: #2D3F55; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+
+/* Selection */
+::selection { background-color: #6366F155; color: #F8FAFC; }
+
+/* Gradient utilities */
+.gradient-text {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-green {
+  background: linear-gradient(135deg, #6366F1 0%, #22C55E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.glow-primary {
+  box-shadow: 0 0 25px #6366F145, 0 0 50px #6366F120;
+}
+
+.glow-accent {
+  box-shadow: 0 0 20px #22C55E30, 0 0 40px #22C55E15;
+}
+
+.blob {
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+@keyframes blob {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -50px) scale(1.08); }
+  66%  { transform: translate(-20px, 20px) scale(0.92); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 9s infinite ease-in-out;
+}
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+.cta-grid{
+  background-image: 
+    linear-gradient(#6366F1 1px, transparent 1px),
+    linear-gradient(90deg, #6366F1 1px, transparent 1px);
+
+  background-size: 32px 32px;
+}
