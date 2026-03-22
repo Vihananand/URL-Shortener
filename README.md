@@ -5,7 +5,7 @@ A URL shortener web application with a marketing landing page and a full link-ma
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript 5 |
 | UI | React 19 |
@@ -26,7 +26,7 @@ A URL shortener web application with a marketing landing page and a full link-ma
 ## Pages
 
 | Route | Description |
-|---|---|
+| --- | --- |
 | `/` | Landing page — Hero, Features, How It Works, Stats, CTA |
 | `/auth/signin` | Sign-in form |
 | `/auth/signup` | Sign-up form |
@@ -45,7 +45,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ## Scripts
 
 | Script | Description |
-|---|---|
+| --- | --- |
 | `npm run dev` | Start local dev server |
 | `npm run build` | Production build |
 | `npm start` | Serve production build |
@@ -56,7 +56,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 The following endpoints are marked with `TODO` comments and are ready to be implemented:
 
 | Method | Endpoint | Used by |
-|---|---|---|
+| --- | --- | --- |
 | `POST` | `/api/urls` | Landing hero shortener, Create Link Modal |
 | `POST` | `/api/auth/signin` | Sign-in page |
 | `POST` | `/api/auth/signup` | Sign-up page |

@@ -1,26 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView, animate } from "motion/react";
+import { useInView, animate, motion } from "motion/react";
+import { Link2, MousePointerClick, Users, TrendingUp } from "lucide-react";
 
 const stats = [
-  { value: 1_200_000, suffix: "+", label: "Links Shortened", prefix: "" },
-  { value: 500_000_000, suffix: "+", label: "Total Clicks Tracked", prefix: "" },
-  { value: 50_000, suffix: "+", label: "Happy Users", prefix: "" },
-  { value: 99.9, suffix: "%", label: "Uptime", prefix: "" },
+  { value: 1_200_000, suffix: "+", label: "Links Shortened", Icon: Link2 },
+  { value: 500_000_000, suffix: "+", label: "Clicks Tracked", Icon: MousePointerClick },
+  { value: 50_000, suffix: "+", label: "Happy Users", Icon: Users },
+  { value: 99.9, suffix: "%", label: "Uptime", Icon: TrendingUp },
 ];
 
-function CountUp({
-  to,
-  prefix = "",
-  suffix = "",
-  decimals = 0,
-}: {
-  to: number;
-  prefix?: string;
-  suffix?: string;
-  decimals?: number;
-}) {
+function CountUp({ to, suffix = "", decimals = 0 }: { to: number; suffix?: string; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [started, setStarted] = useState(false);
@@ -30,58 +21,47 @@ function CountUp({
       setStarted(true);
       const el = ref.current;
       const controls = animate(0, to, {
-        duration: 2,
-        ease: "easeOut",
-        onUpdate(value) {
-          el.textContent =
-            prefix +
-            (decimals > 0
-              ? value.toFixed(decimals)
-              : Math.round(value).toLocaleString()) +
-            suffix;
+        duration: 2.2, ease: "easeOut",
+        onUpdate: (v) => {
+          el.textContent = (decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString()) + suffix;
         },
       });
       return () => controls.stop();
     }
-  }, [isInView, started, to, prefix, suffix, decimals]);
+  }, [isInView, started, to, suffix, decimals]);
 
-  const formattedInitial =
-    prefix +
-    (decimals > 0 ? (0).toFixed(decimals) : "0") +
-    suffix;
-
-  return <span ref={ref}>{formattedInitial}</span>;
+  return <span ref={ref}>{decimals > 0 ? (0).toFixed(decimals) : "0"}{suffix}</span>;
 }
 
 export default function StatsBar() {
   return (
-    <section id="stats" className="py-20 px-4 sm:px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="bg-card border border-border rounded-3xl p-8 sm:p-12 shadow-2xl shadow-bg/50 relative overflow-hidden">
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none rounded-3xl" />
+    <section id="stats" className="py-20 px-5 sm:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="gradient-border-card p-0 overflow-hidden shadow-card">
+          {/* Top bar */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
 
-          <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
-            {stats.map((stat, i) => (
-              <div
-                key={stat.label}
-                className={`text-center ${
-                  i < stats.length - 1
-                    ? "lg:border-r lg:border-border"
-                    : ""
-                }`}
-              >
-                <div className="text-3xl sm:text-4xl font-bold gradient-text mb-2 tabular-nums">
-                  <CountUp
-                    to={stat.value}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                    decimals={stat.value % 1 !== 0 ? 1 : 0}
-                  />
-                </div>
-                <div className="text-sm text-muted">{stat.label}</div>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
+            {stats.map((stat, i) => {
+              const Icon = stat.Icon;
+              return (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.08 }}
+                  whileHover={{ backgroundColor: "rgba(255,255,255,0.025)" }}
+                  className="group flex flex-col items-center justify-center gap-2 py-10 px-6 text-center cursor-default transition-colors duration-300"
+                >
+                  <Icon size={16} className="text-white/20 group-hover:text-white/40 transition-colors" strokeWidth={1.5} />
+                  <div className="text-3xl sm:text-4xl font-bold tracking-[-0.04em] text-white tabular-nums">
+                    <CountUp to={stat.value} suffix={stat.suffix} decimals={stat.value % 1 !== 0 ? 1 : 0} />
+                  </div>
+                  <div className="text-xs text-white/30 group-hover:text-white/50 transition-colors">{stat.label}</div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>

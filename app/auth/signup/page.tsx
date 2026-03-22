@@ -1,10 +1,14 @@
 "use client";
 
+import "@/app/auth/auth.css";
+import Link from "next/link";
 import { useState } from "react";
 import { motion } from "motion/react";
-import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
+import { showToast } from "nextjs-toast-notify";
+import { Link2, User, Mail, Lock, ShieldCheck } from "lucide-react";
 
 function PasswordStrength({ password }: { password: string }) {
   const strength = (() => {
@@ -18,7 +22,13 @@ function PasswordStrength({ password }: { password: string }) {
   })();
 
   const labels = ["", "Weak", "Fair", "Good", "Strong"];
-  const colors = ["", "bg-red-500", "bg-yellow-500", "bg-blue-400", "bg-accent"];
+  const barColors = [
+    "",
+    "bg-red-500",
+    "bg-yellow-500",
+    "bg-white/60",
+    "bg-white",
+  ];
 
   if (!password) return null;
 
@@ -28,13 +38,13 @@ function PasswordStrength({ password }: { password: string }) {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              strength >= i ? colors[strength] : "bg-border"
+            className={`h-0.5 flex-1 rounded-full transition-all duration-300 ${
+              strength >= i ? barColors[strength] : "bg-white/10"
             }`}
           />
         ))}
       </div>
-      <p className="text-xs text-muted">{labels[strength]}</p>
+      <p className="text-[11px] text-white/35">{labels[strength]}</p>
     </div>
   );
 }
@@ -47,13 +57,17 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const router = useRouter();
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Name is required.";
     if (!email) e.email = "Email is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Enter a valid email.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      e.email = "Enter a valid email.";
     if (!password) e.password = "Password is required.";
-    else if (password.length < 8) e.password = "At least 8 characters required.";
+    else if (password.length < 8)
+      e.password = "At least 8 characters required.";
     if (!confirm) e.confirm = "Please confirm your password.";
     else if (confirm !== password) e.confirm = "Passwords do not match.";
     return e;
@@ -62,49 +76,85 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
 
     setLoading(true);
     setErrors({});
-    // TODO: replace with API call — POST /api/auth/signup { name, email, password }
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    window.location.href = "/dashboard";
+    const res = await fetch("/api/signup", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setErrors({ general: data.message });
+      setLoading(false);
+      router.push("/signup");
+      showToast.error(`${data.message}`, {
+        duration: 4000,
+        progress: true,
+        position: "top-center",
+        transition: "fadeIn",
+        icon: "❌",
+        sound: true
+      });
+      return;
+    }
+
+    router.push("/dashboard");
+    showToast.success(`${data.message}`, {
+      duration: 4000,
+      progress: true,
+      position: "top-center",
+      transition: "fadeIn",
+      icon: "✅",
+      sound: true
+    });
   };
 
   const clearErr = (field: string) =>
-    setErrors((p) => { const n = { ...p }; delete n[field]; return n; });
+    setErrors((p) => {
+      const n = { ...p };
+      delete n[field];
+      return n;
+    });
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 blob bg-secondary/15 animate-blob pointer-events-none" />
-      <div className="absolute bottom-1/3 left-1/4 w-80 h-80 blob bg-primary/10 animate-blob animation-delay-4000 pointer-events-none" />
+      {/* Background */}
+      <div className="absolute inset-0 dot-bg pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none auth-gradient-bg" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.45 }}
           className="text-center mb-8"
         >
-          <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg">
+              <Link2 size={16} className="text-black" strokeWidth={2.5} />
             </div>
-            <span className="text-xl font-bold gradient-text">Snip.ly</span>
+            <span className="text-lg font-semibold text-white tracking-tight">Snip.ly</span>
           </Link>
-          <h1 className="text-2xl font-bold text-text">Create your account</h1>
-          <p className="text-sm text-muted mt-1">Start shortening links for free</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Create your account</h1>
+          <p className="text-sm text-white/40 mt-1.5">Start shortening links for free</p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-card border border-border rounded-2xl p-8 shadow-2xl shadow-black/30"
+          transition={{ duration: 0.45, delay: 0.1 }}
+          className="gradient-border-card p-7 shadow-card mb-5"
         >
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
@@ -114,12 +164,7 @@ export default function SignUpPage() {
               value={name}
               onChange={(e) => { setName(e.target.value); clearErr("name"); }}
               error={errors.name}
-              icon={
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              }
+              icon={<User size={15} strokeWidth={1.8} />}
               autoFocus
               autoComplete="name"
             />
@@ -131,12 +176,7 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => { setEmail(e.target.value); clearErr("email"); }}
               error={errors.email}
-              icon={
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22 6 12 13 2 6" />
-                </svg>
-              }
+              icon={<Mail size={15} strokeWidth={1.8} />}
               autoComplete="email"
             />
 
@@ -148,12 +188,7 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); clearErr("password"); }}
                 error={errors.password}
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0110 0v4" />
-                  </svg>
-                }
+                icon={<Lock size={15} strokeWidth={1.8} />}
                 autoComplete="new-password"
               />
               <PasswordStrength password={password} />
@@ -166,12 +201,7 @@ export default function SignUpPage() {
               value={confirm}
               onChange={(e) => { setConfirm(e.target.value); clearErr("confirm"); }}
               error={errors.confirm}
-              icon={
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              }
+              icon={<ShieldCheck size={15} strokeWidth={1.8} />}
               autoComplete="new-password"
             />
 
@@ -180,10 +210,10 @@ export default function SignUpPage() {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <p className="text-sm text-muted">
+          <div className="mt-5 pt-5 border-t border-border text-center">
+            <p className="text-sm text-white/40">
               Already have an account?{" "}
-              <Link href="/auth/signin" className="text-primary hover:text-secondary font-medium transition-colors">
+              <Link href="/auth/signin" className="text-white/80 hover:text-white font-medium transition-colors">
                 Sign in
               </Link>
             </p>
@@ -193,13 +223,12 @@ export default function SignUpPage() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-xs text-muted mt-6"
+          transition={{ delay: 0.35 }}
+          className="text-center text-[11px] text-white/25 mt-4"
         >
           By signing up, you agree to our{" "}
-          <Link href="#" className="hover:text-text transition-colors">Terms</Link>{" "}
-          and{" "}
-          <Link href="#" className="hover:text-text transition-colors">Privacy Policy</Link>.
+          <Link href="#" className="hover:text-white/50 transition-colors">Terms</Link>{" "}and{" "}
+          <Link href="#" className="hover:text-white/50 transition-colors">Privacy Policy</Link>.
         </motion.p>
       </div>
     </div>

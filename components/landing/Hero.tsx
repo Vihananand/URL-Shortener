@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Link2, ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
 import { generateShortCode } from "@/lib/utils";
 
 export default function Hero() {
@@ -12,16 +13,13 @@ export default function Hero() {
   const [error, setError] = useState("");
 
   const handleShorten = async () => {
-    if (!url.trim()) { setError("Please enter a URL first."); return; }
+    if (!url.trim()) { setError("Please enter a URL."); return; }
     try { new URL(url.startsWith("http") ? url : `https://${url}`); }
     catch { setError("Please enter a valid URL."); return; }
-
     setError("");
     setLoading(true);
-    // TODO: replace with API call — POST /api/urls { originalUrl: url }
-    await new Promise((r) => setTimeout(r, 700));
-    const code = generateShortCode();
-    setResult(`https://snip.ly/${code}`);
+    await new Promise((r) => setTimeout(r, 750));
+    setResult(`https://snip.ly/${generateShortCode()}`);
     setLoading(false);
   };
 
@@ -29,82 +27,73 @@ export default function Hero() {
     if (!result) return;
     await navigator.clipboard.writeText(result);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2200);
   };
 
-  const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.12 } } };
-  const fadeUp = {
-    hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
-  };
+  const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.09 } } };
+  const up = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } } };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-24 pb-20 overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="blob animate-blob absolute top-1/4 left-1/4 w-80 h-80 bg-primary/20" />
-        <div className="blob animate-blob animation-delay-2000 absolute top-1/3 right-1/4 w-96 h-96 bg-secondary/15" />
-        <div className="blob animate-blob animation-delay-4000 absolute bottom-1/4 left-1/2 w-64 h-64 bg-accent/10" />
-        <div className="absolute inset-0 bg-bg/40" />
-      </div>
+    <section className="relative min-h-screen flex flex-col items-center justify-center px-5 sm:px-8 pt-24 pb-20 overflow-hidden">
 
-      {/* Grid overlay */}
+      {/* Dot grid background */}
+      <div className="absolute inset-0 dot-bg pointer-events-none" />
+
+      {/* Radial fade overlay */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage:
-            "linear-gradient(#F8FAFC 1px, transparent 1px), linear-gradient(90deg, #F8FAFC 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 80% 70% at 50% 0%, transparent 0%, #080808 70%)" }}
       />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 100%, transparent 0%, #080808 80%)" }}
+      />
+
+      {/* Subtle blob accents */}
+      <div className="blob animate-blob absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/[0.025] pointer-events-none" />
+      <div className="blob animate-blob animation-delay-2000 absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-white/[0.018] pointer-events-none" />
 
       <motion.div
         variants={stagger}
         initial="hidden"
         animate="visible"
-        className="relative z-10 max-w-3xl mx-auto text-center"
+        className="relative z-10 max-w-2xl mx-auto text-center"
       >
-        {/* Badge */}
-        <motion.div variants={fadeUp} className="inline-flex items-center gap-2 mb-6">
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary border border-primary/25">
-            ✦ Now with real-time analytics
-          </span>
+        {/* Eyebrow pill */}
+        <motion.div variants={up} className="inline-flex items-center gap-2 mb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-[11px] font-medium text-white/55 tracking-wide uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-ticker inline-block" />
+            Now with real-time analytics
+          </div>
         </motion.div>
 
         {/* Headline */}
         <motion.h1
-          variants={fadeUp}
-          className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6"
+          variants={up}
+          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.03em] leading-[1.06] mb-5"
         >
-          Shorten URLs.{" "}
-          <span className="gradient-text">Amplify</span>{" "}
-          Your Reach.
+          <span className="text-gradient-bright">Shorten links.</span>
+          <br />
+          <span className="text-white/30">Amplify reach.</span>
         </motion.h1>
 
         {/* Subtitle */}
-        <motion.p
-          variants={fadeUp}
-          className="text-base sm:text-lg text-text/60 max-w-xl mx-auto mb-10 leading-relaxed"
-        >
-          Create clean short links, track every click, and share with
-          confidence — all from one beautiful dashboard.
+        <motion.p variants={up} className="text-base text-white/40 max-w-md mx-auto mb-10 leading-relaxed">
+          Create clean short links, track every click, and share with confidence — all from one beautiful dashboard.
         </motion.p>
 
-        {/* URL Input */}
-        <motion.div variants={fadeUp} className="w-full max-w-2xl mx-auto">
-          <div className="glass-card rounded-2xl p-2 flex gap-2 shadow-2xl shadow-black/30">
+        {/* Input */}
+        <motion.div variants={up} className="w-full max-w-xl mx-auto">
+          <div className="gradient-border-card p-1.5 flex gap-2 shadow-card">
             <div className="flex-1 flex items-center gap-3 px-4">
-              <svg className="text-muted shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-              </svg>
+              <Link2 size={15} className="text-white/30 shrink-0" />
               <input
                 type="text"
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setError(""); }}
                 onKeyDown={(e) => e.key === "Enter" && handleShorten()}
                 placeholder="Paste your long URL here..."
-                className="flex-1 bg-transparent outline-none text-text placeholder-muted text-sm py-2"
+                className="flex-1 bg-transparent outline-none text-white placeholder-white/25 text-sm py-2.5"
                 spellCheck={false}
               />
             </div>
@@ -113,79 +102,82 @@ export default function Hero() {
               whileTap={{ scale: 0.97 }}
               onClick={handleShorten}
               disabled={loading}
-              className="gradient-bg text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow disabled:opacity-70 disabled:cursor-not-allowed shrink-0"
+              className="btn-primary text-sm px-5 py-2.5 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             >
               {loading ? (
-                <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin inline-block" />
               ) : (
-                "Shorten →"
+                <><span>Shorten</span><ArrowRight size={13} /></>
               )}
             </motion.button>
           </div>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-red-400 text-sm mt-2 text-left px-4"
-            >
-              {error}
-            </motion.p>
-          )}
+
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-2 text-xs text-white/40 text-left px-2 flex items-center gap-1.5"
+              >
+                <span className="w-1 h-1 rounded-full bg-white/40 inline-block shrink-0" />
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Result card */}
+        {/* Result */}
         <AnimatePresence>
           {result && (
             <motion.div
               initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="mt-4 w-full max-w-2xl mx-auto glass-card rounded-2xl p-4 flex items-center gap-4 border border-accent/20 glow-accent"
+              transition={{ duration: 0.38, ease: "easeOut" }}
+              className="mt-3 w-full max-w-xl mx-auto gradient-border-card p-4 flex items-center gap-3 shadow-card"
             >
-              <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 280, damping: 16, delay: 0.1 }}
+                className="w-8 h-8 rounded-lg bg-white/8 flex items-center justify-center shrink-0"
+              >
+                <Check size={14} className="text-white/80" strokeWidth={2.5} />
+              </motion.div>
               <div className="flex-1 text-left min-w-0">
-                <p className="text-xs text-muted mb-0.5">Your short link is ready</p>
-                <p className="text-sm font-semibold text-accent truncate">{result}</p>
+                <p className="text-[10px] text-white/30 mb-0.5 uppercase tracking-wider">Your short link</p>
+                <p className="text-sm font-medium text-white truncate">{result}</p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={handleCopy}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    copied
-                      ? "bg-accent/20 text-accent"
-                      : "bg-white/5 text-text/70 hover:text-text hover:bg-white/10"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    copied ? "bg-white/12 text-white" : "bg-white/5 text-white/50 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  {copied ? "✓ Copied!" : "Copy"}
+                  {copied ? <Check size={11} /> : <Copy size={11} />}
+                  {copied ? "Copied" : "Copy"}
                 </motion.button>
-                <a
-                  href={result}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-text/70 hover:text-text hover:bg-white/10 transition-all"
+                <motion.a
+                  href={result} target="_blank" rel="noopener noreferrer"
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all"
                 >
-                  Open ↗
-                </a>
+                  <ExternalLink size={11} /> Open
+                </motion.a>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Trust badges */}
-        <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-text/40">
-          {["10M+ URLs shortened", "500M+ clicks tracked", "Free to start"].map((item) => (
-            <span key={item} className="flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#22C55E">
-                <polyline points="20 6 9 17 4 12" stroke="#22C55E" strokeWidth="2.5" fill="none" />
-              </svg>
-              {item}
+        <motion.div variants={up} className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-white/25">
+          {["10M+ URLs shortened", "500M+ clicks tracked", "Free to start"].map((t) => (
+            <span key={t} className="flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-white/25 inline-block" />
+              {t}
             </span>
           ))}
         </motion.div>

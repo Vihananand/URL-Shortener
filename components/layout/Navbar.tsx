@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
+import { Link2, X, Menu, ArrowRight } from "lucide-react";
 
 const navLinks = [
   { href: "/#features", label: "Features" },
@@ -17,9 +18,9 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const isDashboard = pathname?.startsWith("/dashboard");
@@ -28,36 +29,35 @@ export default function Navbar() {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled || isDashboard
-          ? "bg-bg/85 backdrop-blur-xl border-b border-border shadow-lg shadow-bg/20"
+          ? "bg-bg/85 backdrop-blur-2xl border-b border-border"
           : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <nav className="max-w-6xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between">
+
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2.5 group">
           <motion.div
-            whileHover={{ rotate: 15, scale: 1.1 }}
-            transition={{ duration: 0.2 }}
-            className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center shadow-lg shadow-primary/30"
+            whileHover={{ rotate: 10, scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 350, damping: 18 }}
+            className="w-7 h-7 bg-white rounded-lg flex items-center justify-center"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
+            <Link2 size={14} className="text-black" strokeWidth={2.5} />
           </motion.div>
-          <span className="text-lg font-bold gradient-text">Snip.ly</span>
+          <span className="text-[15px] font-semibold tracking-tight text-white">Snip.ly</span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop links */}
         {!isDashboard && (
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5 text-sm">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-4 py-2 text-sm text-fg/60 hover:text-fg rounded-lg hover:bg-white/5 transition-all duration-200"
+                className="px-3.5 py-1.5 text-white/45 hover:text-white/90 rounded-lg hover:bg-white/5 transition-all duration-200 font-medium"
               >
                 {link.label}
               </Link>
@@ -66,79 +66,47 @@ export default function Navbar() {
         )}
 
         {isDashboard && (
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 text-sm text-fg/60 hover:text-fg rounded-lg hover:bg-white/5 transition-all duration-200"
-            >
-              Dashboard
-            </Link>
-          </div>
+          <Link href="/dashboard" className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all">
+            Dashboard
+          </Link>
         )}
 
-        {/* CTA buttons */}
-        <div className="flex items-center gap-3">
+        {/* CTA */}
+        <div className="flex items-center gap-2">
           {!isDashboard ? (
             <>
-              <Link
-                href="/auth/signin"
-                className="hidden md:block text-sm text-fg/70 hover:text-fg transition-colors duration-200 px-3 py-2"
-              >
+              <Link href="/auth/signin" className="hidden md:block text-sm text-white/50 hover:text-white transition-colors px-3 py-1.5">
                 Sign in
               </Link>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                 <Link
                   href="/auth/signup"
-                  className="gradient-bg text-white text-sm font-medium px-4 py-2 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow duration-200"
+                  className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5"
                 >
-                  Get Started
+                  Get Started <ArrowRight size={13} />
                 </Link>
               </motion.div>
             </>
           ) : (
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                href="/"
-                className="text-sm text-fg/70 hover:text-fg transition-colors duration-200 px-3 py-2"
-              >
-                ← Home
-              </Link>
-            </motion.div>
+            <Link href="/" className="text-sm text-white/50 hover:text-white transition-colors px-3 py-1.5">
+              ← Home
+            </Link>
           )}
 
-          {/* Mobile hamburger */}
           {!isDashboard && (
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors text-fg/70 cursor-pointer"
+              className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/6 transition-all border border-border cursor-pointer"
             >
               <AnimatePresence mode="wait">
                 {mobileOpen ? (
-                  <motion.svg
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="2"
-                  >
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </motion.svg>
+                  <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.12 }}>
+                    <X size={15} />
+                  </motion.div>
                 ) : (
-                  <motion.svg
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="2"
-                  >
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </motion.svg>
+                  <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.12 }}>
+                    <Menu size={15} />
+                  </motion.div>
                 )}
               </AnimatePresence>
             </button>
@@ -146,7 +114,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -154,40 +122,20 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="md:hidden bg-card/95 backdrop-blur-xl border-b border-border overflow-hidden"
+            className="md:hidden bg-card border-b border-border overflow-hidden"
           >
-            <div className="px-4 pt-2 pb-5 flex flex-col gap-1">
+            <div className="px-4 pt-2 pb-5 flex flex-col gap-0.5">
               {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-3 text-sm text-fg/70 hover:text-fg hover:bg-white/5 rounded-xl transition-all duration-200"
-                  >
+                <motion.div key={link.href} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
+                  <Link href={link.href} onClick={() => setMobileOpen(false)} className="flex items-center justify-between px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                     {link.label}
+                    <ArrowRight size={13} className="text-white/25" />
                   </Link>
                 </motion.div>
               ))}
               <div className="pt-3 mt-2 border-t border-border flex flex-col gap-2">
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-3 text-sm text-fg/70 hover:text-fg hover:bg-white/5 rounded-xl transition-all"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-3 text-sm text-center gradient-bg text-white font-medium rounded-xl"
-                >
-                  Get Started Free
-                </Link>
+                <Link href="/auth/signin" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">Sign in</Link>
+                <Link href="/auth/signup" onClick={() => setMobileOpen(false)} className="btn-primary text-sm text-center py-2.5 px-3">Get Started Free</Link>
               </div>
             </div>
           </motion.div>

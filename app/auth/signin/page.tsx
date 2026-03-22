@@ -1,84 +1,126 @@
 "use client";
 
+import "@/app/auth/auth.css";
+import Link from "next/link";
 import { useState } from "react";
 import { motion } from "motion/react";
-import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import { showToast } from "nextjs-toast-notify";
+import { Link2, Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
 
   const validate = () => {
     const e: typeof errors = {};
     if (!email) e.email = "Email is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Enter a valid email.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      e.email = "Enter a valid email.";
     if (!password) e.password = "Password is required.";
     return e;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
 
     setLoading(true);
     setErrors({});
-    // TODO: replace with API call — POST /api/auth/signin { email, password }
-    await new Promise((r) => setTimeout(r, 800));
+
+    const res = await fetch("/api/signin", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setErrors({ general: data.message });
+      setLoading(false);
+      showToast.error(`${data.message}`, {
+        duration: 4000,
+        progress: true,
+        position: "top-center",
+        transition: "fadeIn",
+        icon: "❌",
+        sound: true,
+      });
+      return;
+    }
+
+    router.push("/dashboard");
+    showToast.success(`${data.message}`, {
+      duration: 4000,
+      progress: true,
+      position: "top-center",
+      transition: "fadeIn",
+      icon: "✅",
+      sound: true,
+    });
+
     setLoading(false);
-    window.location.href = "/dashboard";
   };
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 blob bg-primary/15 animate-blob pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 blob bg-secondary/10 animate-blob animation-delay-2000 pointer-events-none" />
+      {/* Background */}
+      <div className="absolute inset-0 dot-bg pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none auth-gradient-bg" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.45 }}
           className="text-center mb-8"
         >
-          <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg">
+              <Link2 size={16} className="text-black" strokeWidth={2.5} />
             </div>
-            <span className="text-xl font-bold gradient-text">Snip.ly</span>
+            <span className="text-lg font-semibold text-white tracking-tight">
+              Snip.ly
+            </span>
           </Link>
-          <h1 className="text-2xl font-bold text-text">Welcome back</h1>
-          <p className="text-sm text-muted mt-1">Sign in to your Snip.ly account</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-sm text-white/40 mt-1.5">
+            Sign in to your Snip.ly account
+          </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-card border border-border rounded-2xl p-8 shadow-2xl shadow-black/30"
+          transition={{ duration: 0.45, delay: 0.1 }}
+          className="gradient-border-card p-7 shadow-card mb-5"
         >
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="Email address"
               type="email"
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
               error={errors.email}
-              icon={
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22 6 12 13 2 6" />
-                </svg>
-              }
+              icon={<Mail size={15} strokeWidth={1.8} />}
               autoComplete="email"
               autoFocus
             />
@@ -89,32 +131,41 @@ export default function SignInPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
                 error={errors.password}
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0110 0v4" />
-                  </svg>
-                }
+                icon={<Lock size={15} strokeWidth={1.8} />}
                 autoComplete="current-password"
               />
               <div className="flex justify-end mt-1.5">
-                <Link href="#" className="text-xs text-primary hover:text-secondary transition-colors">
+                <Link
+                  href="#"
+                  className="text-[11px] text-white/35 hover:text-white/60 transition-colors"
+                >
                   Forgot password?
                 </Link>
               </div>
             </div>
 
-            <Button variant="primary" type="submit" loading={loading} size="lg" className="w-full mt-1">
+            <Button
+              variant="primary"
+              type="submit"
+              loading={loading}
+              size="lg"
+              className="w-full mt-1"
+            >
               {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <p className="text-sm text-muted">
+          <div className="mt-5 pt-5 border-t border-border text-center">
+            <p className="text-sm text-white/40">
               Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="text-primary hover:text-secondary font-medium transition-colors">
+              <Link
+                href="/auth/signup"
+                className="text-white/80 hover:text-white font-medium transition-colors"
+              >
                 Sign up free
               </Link>
             </p>
@@ -124,13 +175,18 @@ export default function SignInPage() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-xs text-muted mt-6"
+          transition={{ delay: 0.35 }}
+          className="text-center text-[11px] text-white/25 mt-4"
         >
           By signing in, you agree to our{" "}
-          <Link href="#" className="hover:text-text transition-colors">Terms</Link>{" "}
+          <Link href="#" className="hover:text-white/50 transition-colors">
+            Terms
+          </Link>{" "}
           and{" "}
-          <Link href="#" className="hover:text-text transition-colors">Privacy Policy</Link>.
+          <Link href="#" className="hover:text-white/50 transition-colors">
+            Privacy Policy
+          </Link>
+          .
         </motion.p>
       </div>
     </div>
