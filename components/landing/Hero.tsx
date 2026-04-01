@@ -19,7 +19,7 @@ export default function Hero() {
     setError("");
     setLoading(true);
     await new Promise((r) => setTimeout(r, 750));
-    setResult(`https://snip.ly/${generateShortCode()}`);
+    setResult(`https://url-shortener-chi-seven.vercel.app/${generateShortCode()}`);
     setLoading(false);
   };
 

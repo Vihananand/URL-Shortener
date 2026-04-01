@@ -1,4 +1,4 @@
-# Snip.ly — URL Shortener
+# Slicly — URL Shortener
 
 A URL shortener web application with a marketing landing page and a full link-management dashboard. Built as a polished frontend prototype — all data is mocked client-side, with clear `TODO` markers where real API calls should be wired in.
 
@@ -15,9 +15,9 @@ A URL shortener web application with a marketing landing page and a full link-ma
 
 ## Features
 
-- **Hero shortener** — paste a URL on the landing page and instantly get a `snip.ly/<code>` short link with one-click copy
+- **Hero shortener** — paste a URL on the landing page and instantly get a `slicely.in/<code>` short link with one-click copy
 - **Dashboard** — manage all your links with search, sort, toggle active/inactive, delete, and copy-to-clipboard
-- **Create Link Modal** — custom slug support, URL validation, and a live `snip.ly/<slug>` preview
+- **Create Link Modal** — custom slug support, URL validation, and a live `slicely.in/<slug>` preview
 - **Auth pages** — sign-in and sign-up forms with validation, password strength indicator, and loading states
 - **Animated stats bar** — count-up animation (1.2M links, 500M clicks, 50K users, 99.9% uptime) triggered on scroll
 - **Responsive Navbar** — scroll-aware frosted glass effect with a mobile hamburger menu

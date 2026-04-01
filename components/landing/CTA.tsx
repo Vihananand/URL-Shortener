@@ -39,7 +39,7 @@ export default function CTA() {
             </h2>
 
             <p className="text-white/35 text-sm max-w-md mx-auto mb-10 leading-relaxed">
-              Join 50,000+ marketers, developers, and creators who trust Snip.ly to power their links.
+              Join 50,000+ marketers, developers, and creators who trust Slicly to power their links.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

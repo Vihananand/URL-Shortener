@@ -180,7 +180,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
         <div className="sticky top-0 bg-card border-b border-border p-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Analytics</h2>
-            <p className="text-sm text-white/50 mt-1">snip.ly/{analytics.shortCode}</p>
+            <p className="text-sm text-white/50 mt-1">url-shortener-chi-seven.vercel.app/{analytics.shortCode}</p>
           </div>
           <button
             onClick={onClose}

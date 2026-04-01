@@ -93,14 +93,14 @@ export default function SignInPage() {
               <Link2 size={16} className="text-black" strokeWidth={2.5} />
             </div>
             <span className="text-lg font-semibold text-white tracking-tight">
-              Snip.ly
+              Slicly
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white tracking-tight">
             Welcome back
           </h1>
           <p className="text-sm text-white/40 mt-1.5">
-            Sign in to your Snip.ly account
+            Sign in to your Slicly account
           </p>
         </motion.div>
 

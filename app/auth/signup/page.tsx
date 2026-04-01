@@ -144,7 +144,7 @@ export default function SignUpPage() {
             <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg">
               <Link2 size={16} className="text-black" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-semibold text-white tracking-tight">Snip.ly</span>
+            <span className="text-lg font-semibold text-white tracking-tight">Slicly</span>
           </Link>
           <h1 className="text-2xl font-bold text-white tracking-tight">Create your account</h1>
           <p className="text-sm text-white/40 mt-1.5">Start shortening links for free</p>

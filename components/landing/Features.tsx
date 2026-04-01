@@ -54,7 +54,7 @@ export default function Features() {
             <span className="text-white/35">modern teams</span>
           </h2>
           <p className="text-white/35 max-w-md mx-auto text-sm leading-relaxed">
-            From startups to enterprises, Snip.ly adapts to every workflow with the features that matter most.
+            From startups to enterprises, Slicly adapts to every workflow with the features that matter most.
           </p>
         </motion.div>
 

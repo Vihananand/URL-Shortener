@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
           id: url.id,
           originalUrl: url.original_url,
           shortCode: url.short_code,
-          shortUrl: `https://snip.ly/${url.short_code}`,
+          shortUrl: `https://url-shortener-chi-seven.vercel.app/${url.short_code}`,
           clicks: url.clicks,
           isActive: url.is_active,
           createdAt: url.created_at,

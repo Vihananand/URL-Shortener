@@ -83,7 +83,7 @@ export default function Navbar() {
             <Link2 size={14} className="text-black" strokeWidth={2.5} />
           </motion.div>
           <span className="text-[15px] font-semibold tracking-tight text-white">
-            Snip.ly
+            Slicly
           </span>
         </Link>
 

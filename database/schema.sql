@@ -1,4 +1,4 @@
--- URL Analytics Schema for Snip.ly
+-- URL Analytics Schema for Slicly
 
 -- Main users table
 CREATE TABLE users (

@@ -30,7 +30,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     {
       label: "Top Performer",
       value: stats.topUrl ? formatNumber(stats.topUrl.clicks) + " clicks" : "—",
-      sub: stats.topUrl ? `snip.ly/${stats.topUrl.shortCode}` : "No links yet",
+      sub: stats.topUrl ? `url-shortener-chi-seven.vercel.app/${stats.topUrl.shortCode}` : "No links yet",
       Icon: Star,
     },
   ];

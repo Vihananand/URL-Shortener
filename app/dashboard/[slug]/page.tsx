@@ -201,7 +201,7 @@ export default function DashboardPage() {
                 </p>
                 <button
                   onClick={() => setModalOpen(true)}
-                  className="inline-flex items-center gap-2 gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-primary/25 cursor-pointer"
+                  className="inline-flex items-center gap-2 gradient-bg text-black px-6 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-primary/25 cursor-pointer"
                 >
                   Create your first link →
                 </button>

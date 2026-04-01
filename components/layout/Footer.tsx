@@ -47,7 +47,7 @@ export default function Footer() {
               <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center">
                 <Link2 size={13} className="text-black" strokeWidth={2.5} />
               </div>
-              <span className="text-[15px] font-semibold text-white tracking-tight">Snip.ly</span>
+              <span className="text-[15px] font-semibold text-white tracking-tight">Slicly</span>
             </Link>
             <p className="text-xs text-white/35 leading-relaxed max-w-[180px]">
               The fastest way to shorten, share, and track your links worldwide.
@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-white/25">© {new Date().getFullYear()} Snip.ly. All rights reserved.</p>
+          <p className="text-[11px] text-white/25">© {new Date().getFullYear()} Slicly. All rights reserved.</p>
           <p className="text-[11px] text-white/25">Built with ⚡ and a lot of ☕</p>
         </div>
       </div>

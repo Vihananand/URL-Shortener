@@ -129,7 +129,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-sm font-semibold text-white/85 truncate">snip.ly/{url.shortCode}</span>
+                        <span className="text-sm font-semibold text-white/85 truncate">url-shortener-chi-seven.vercel.app/{url.shortCode}</span>
                         <CopyButton text={url.shortUrl} />
                       </div>
                       <p className="text-[11px] text-white/30 truncate" title={url.originalUrl}>
@@ -188,15 +188,12 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
           </AnimatePresence>
         </div>
       )}
-    </div>
-    <>
       {analyticsUrlId && (
         <AnalyticsView
           urlId={analyticsUrlId}
           onClose={() => setAnalyticsUrlId(null)}
         />
       )}
-    </>
-    </>
+    </div>
   );
 }
