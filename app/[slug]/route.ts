@@ -1,14 +1,15 @@
 import pool from "@/lib/db";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { headers } from "next/headers";
+import type { NextRequest } from "next/server";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export async function GET(req: Request, { params }: RouteParams) {
+export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = await params;
 

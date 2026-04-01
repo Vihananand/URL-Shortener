@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 function getDeviceType(userAgent: string): "Desktop" | "Mobile" | "Tablet" {
