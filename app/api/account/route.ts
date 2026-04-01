@@ -3,6 +3,14 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
+import { createRateLimiter } from "@/lib/rateLimiter";
+import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+
+// Rate limiter: 2 account deletion attempts per day per user
+const deleteAccountLimiter = createRateLimiter({
+  windowMs: 24 * 60 * 60 * 1000,
+  maxRequests: 2,
+});
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -10,17 +18,32 @@ export async function DELETE(req: NextRequest) {
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
+      return withSecurityHeaders(
+        NextResponse.json(
+          { message: "Unauthorized" },
+          { status: 401 }
+        )
       );
     }
 
     const decoded = verifyToken(token) as JwtPayload;
-    if (!decoded) {
-      return NextResponse.json(
-        { message: "Invalid Token" },
-        { status: 401 }
+    if (!decoded || !decoded.email) {
+      return withSecurityHeaders(
+        NextResponse.json(
+          { message: "Invalid Token" },
+          { status: 401 }
+        )
+      );
+    }
+
+    // Rate limit account deletion attempts
+    const limitCheck = deleteAccountLimiter.checkLimit(`delete-account-${decoded.email}`);
+    if (!limitCheck.allowed) {
+      return withSecurityHeaders(
+        NextResponse.json(
+          { message: "Too many deletion attempts. Please try again later." },
+          { status: 429 }
+        )
       );
     }
 
@@ -31,19 +54,40 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (userResult.rows.length === 0) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
+      return withSecurityHeaders(
+        NextResponse.json(
+          { message: "User not found" },
+          { status: 404 }
+        )
       );
     }
 
     const userId = userResult.rows[0].id;
 
-    // Delete all URLs for this user first
-    await pool.query("DELETE FROM urls WHERE user_id = $1", [userId]);
+    // Start transaction - delete all related data
+    await pool.query("BEGIN");
 
-    // Delete user
-    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+    try {
+      // Delete analytics data
+      await pool.query(
+        `DELETE FROM analytics
+         WHERE url_id IN (SELECT id FROM urls WHERE user_id = $1)`,
+        [userId]
+      );
+
+      // Delete all URLs for this user
+      await pool.query("DELETE FROM urls WHERE user_id = $1", [userId]);
+
+      // Delete user
+      await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+
+      // Commit transaction
+      await pool.query("COMMIT");
+    } catch (err) {
+      // Rollback on error
+      await pool.query("ROLLBACK");
+      throw err;
+    }
 
     const res = NextResponse.json(
       { message: "Account deleted successfully" },
@@ -53,18 +97,19 @@ export async function DELETE(req: NextRequest) {
     // Clear the token cookie
     res.cookies.set("token", "", {
       httpOnly: true,
-      maxAge: 0,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
+      maxAge: 0,
     });
 
-    return res;
+    return withSecurityHeaders(res);
   } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
+    console.error("Account deletion error:", err);
+    const res = NextResponse.json(
+      { message: sanitizeErrorMessage(err) },
       { status: 500 }
     );
+    return withSecurityHeaders(res);
   }
 }
