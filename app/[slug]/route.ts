@@ -1,6 +1,6 @@
 import pool from "@/lib/db";
-import { redirect, unstable_rethrow } from "next/navigation";
 import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 interface RouteParams {
@@ -20,14 +20,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     );
 
     if (result.rows.length === 0) {
-      redirect("/?error=link-not-found");
+      return NextResponse.redirect(new URL("/?error=link-not-found", req.url));
     }
 
     const url = result.rows[0];
 
     // Check if URL is active
     if (!url.is_active) {
-      redirect("/?error=link-disabled");
+      return NextResponse.redirect(new URL("/?error=link-disabled", req.url));
     }
 
     // Get request headers for analytics
@@ -53,10 +53,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     ]);
 
     // Redirect to original URL
-    redirect(url.original_url);
+    return NextResponse.redirect(url.original_url);
   } catch (err) {
-    unstable_rethrow(err);
     console.error(err);
-    redirect("/?error=redirect-failed");
+    return NextResponse.redirect(new URL("/?error=redirect-failed", req.url));
   }
 }

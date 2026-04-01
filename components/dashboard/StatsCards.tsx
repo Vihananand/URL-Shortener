@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import type { DashboardStats } from "@/types";
 import { formatNumber } from "@/lib/utils";
+import { APP_DOMAIN } from "@/lib/site";
 import { Link2, MousePointerClick, CheckCircle2, Star } from "lucide-react";
 
 interface StatsCardsProps { stats: DashboardStats; }
@@ -30,7 +31,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
     {
       label: "Top Performer",
       value: stats.topUrl ? formatNumber(stats.topUrl.clicks) + " clicks" : "—",
-      sub: stats.topUrl ? `url-shortener-chi-seven.vercel.app/${stats.topUrl.shortCode}` : "No links yet",
+      sub: stats.topUrl ? `${APP_DOMAIN}/${stats.topUrl.shortCode}` : "No links yet",
       Icon: Star,
     },
   ];

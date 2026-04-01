@@ -1,7 +1,8 @@
 import type { ShortenedUrl, DashboardStats } from "@/types";
 import { generateShortCode } from "@/lib/utils";
+import { APP_URL } from "@/lib/site";
 
-export const BASE_URL = "https://url-shortener-chi-seven.vercel.app";
+export const BASE_URL = APP_URL;
 
 export const mockUrls: ShortenedUrl[] = [
   {

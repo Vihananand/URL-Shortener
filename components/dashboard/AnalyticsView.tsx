@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Calendar, TrendingUp, Users, Globe } from "lucide-react";
+import { APP_DOMAIN } from "@/lib/site";
 
 interface AnalyticsData {
   shortCode: string;
@@ -180,7 +181,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
         <div className="sticky top-0 bg-card border-b border-border p-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Analytics</h2>
-            <p className="text-sm text-white/50 mt-1">url-shortener-chi-seven.vercel.app/{analytics.shortCode}</p>
+            <p className="text-sm text-white/50 mt-1">{APP_DOMAIN}/{analytics.shortCode}</p>
           </div>
           <button
             onClick={onClose}

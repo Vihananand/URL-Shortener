@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
+import { APP_URL } from "@/lib/site";
 
 interface RouteParams {
   params: Promise<{
@@ -79,7 +80,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
           id: url.id,
           originalUrl: url.original_url,
           shortCode: url.short_code,
-          shortUrl: `https://url-shortener-chi-seven.vercel.app/${url.short_code}`,
+          shortUrl: `${APP_URL}/${url.short_code}`,
           clicks: url.clicks,
           isActive: url.is_active,
           createdAt: url.created_at,

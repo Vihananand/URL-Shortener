@@ -7,6 +7,7 @@ import type { JwtPayload } from "jsonwebtoken";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { validators } from "@/lib/validators";
 import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { APP_URL } from "@/lib/site";
 
 // Rate limiter: 30 URL creations per hour per user
 const createUrlLimiter = createRateLimiter({
@@ -143,7 +144,7 @@ export async function POST(req: NextRequest) {
             id: url.id,
             originalUrl: url.original_url,
             shortCode: url.short_code,
-            shortUrl: `https://url-shortener-chi-seven.vercel.app/${url.short_code}`,
+            shortUrl: `${APP_URL}/${url.short_code}`,
             clicks: url.clicks,
             isActive: url.is_active,
             createdAt: url.created_at,
@@ -229,7 +230,7 @@ export async function GET(req: NextRequest) {
       id: url.id,
       originalUrl: url.original_url,
       shortCode: url.short_code,
-      shortUrl: `https://url-shortener-chi-seven.vercel.app/${url.short_code}`,
+      shortUrl: `${APP_URL}/${url.short_code}`,
       clicks: url.clicks,
       isActive: url.is_active,
       createdAt: url.created_at,

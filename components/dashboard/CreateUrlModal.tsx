@@ -6,6 +6,7 @@ import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import type { ShortenedUrl } from "@/types";
+import { APP_DOMAIN } from "@/lib/site";
 
 interface CreateUrlModalProps {
   isOpen: boolean;
@@ -109,7 +110,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
               animate={{ opacity: 1, y: 0 }}
               className="mt-1.5 text-xs text-muted"
             >
-              Preview: <span className="text-primary font-medium">url-shortener-chi-seven.vercel.app/{customSlug}</span>
+              Preview: <span className="text-primary font-medium">{APP_DOMAIN}/{customSlug}</span>
             </motion.p>
           )}
         </div>

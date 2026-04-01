@@ -50,7 +50,7 @@ export default function Navbar() {
           duration: 3000,
           position: "top-center",
         });
-        router.push("/");
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Logout error:", err);
@@ -104,12 +104,6 @@ export default function Navbar() {
 
         {isDashboard && (
           <div className="flex items-center gap-2">
-            <Link
-              href="/dashboard"
-              className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
-            >
-              Dashboard
-            </Link>
             <button
               onClick={handleLogout}
               className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
@@ -117,6 +111,12 @@ export default function Navbar() {
               <LogOut size={14} />
               Logout
             </button>
+            <Link
+              href="/dashboard"
+              className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
+            >
+              Dashboard
+            </Link>
           </div>
         )}
 
@@ -146,12 +146,21 @@ export default function Navbar() {
                     Sign Up
                   </Link>
                 ) : (
-                  <Link
-                    href="/dashboard"
-                    className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5"
-                  >
-                    Dashboard
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-white/50 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <LogOut size={14} />
+                      Logout
+                    </button>
+                    <Link
+                      href="/dashboard"
+                      className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5"
+                    >
+                      Dashboard
+                    </Link>
+                  </div>
                 )}
               </motion.div>
             </>
@@ -227,20 +236,45 @@ export default function Navbar() {
                 </motion.div>
               ))}
               <div className="pt-3 mt-2 border-t border-border flex flex-col gap-2">
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  onClick={() => setMobileOpen(false)}
-                  className="btn-primary text-sm text-center py-2.5 px-3"
-                >
-                  Get Started Free
-                </Link>
+                {!user ? (
+                  <>
+                    <Link
+                      href="/auth/signin"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      onClick={() => setMobileOpen(false)}
+                      className="btn-primary text-sm text-center py-2.5 px-3"
+                    >
+                      Get Started Free
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="btn-primary text-sm text-center py-2.5 px-3"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setMobileOpen(false);
+                        await handleLogout();
+                      }}
+                      className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <LogOut size={14} />
+                      Logout
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

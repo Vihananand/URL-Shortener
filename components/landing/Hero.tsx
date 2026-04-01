@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link2, ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
 import { generateShortCode } from "@/lib/utils";
+import { APP_URL } from "@/lib/site";
 
 export default function Hero() {
   const [url, setUrl] = useState("");
@@ -19,7 +20,7 @@ export default function Hero() {
     setError("");
     setLoading(true);
     await new Promise((r) => setTimeout(r, 750));
-    setResult(`https://url-shortener-chi-seven.vercel.app/${generateShortCode()}`);
+    setResult(`${APP_URL}/${generateShortCode()}`);
     setLoading(false);
   };
 

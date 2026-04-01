@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { ShortenedUrl } from "@/types";
 import { timeAgo, truncateUrl, formatNumber } from "@/lib/utils";
+import { APP_DOMAIN } from "@/lib/site";
 import Badge from "@/components/ui/Badge";
 import CopyButton from "@/components/ui/CopyButton";
 import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2, Link2, BarChart3 } from "lucide-react";
@@ -129,7 +130,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-sm font-semibold text-white/85 truncate">url-shortener-chi-seven.vercel.app/{url.shortCode}</span>
+                        <span className="text-sm font-semibold text-white/85 truncate">{APP_DOMAIN}/{url.shortCode}</span>
                         <CopyButton text={url.shortUrl} />
                       </div>
                       <p className="text-[11px] text-white/30 truncate" title={url.originalUrl}>
