@@ -1,5 +1,6 @@
 import pool from "@/lib/db";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 interface RouteParams {
   params: {
@@ -13,7 +14,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 
     // Find URL by short code
     const result = await pool.query(
-      `SELECT original_url, is_active FROM urls WHERE short_code = $1`,
+      `SELECT id, original_url, is_active FROM urls WHERE short_code = $1`,
       [slug]
     );
 
@@ -28,11 +29,27 @@ export async function GET(req: Request, { params }: RouteParams) {
       redirect("/?error=link-disabled");
     }
 
-    // Increment click count
-    await pool.query(
-      `UPDATE urls SET clicks = clicks + 1 WHERE short_code = $1`,
-      [slug]
-    );
+    // Get request headers for analytics
+    const headersList = await headers();
+    const ipAddress =
+      headersList.get("x-forwarded-for") ||
+      headersList.get("x-real-ip") ||
+      headersList.get("cf-connecting-ip") ||
+      "unknown";
+    const userAgent = headersList.get("user-agent") || "unknown";
+    const referrer = headersList.get("referer") || null;
+
+    // Record analytics in parallel with click increment
+    await Promise.all([
+      // Update click count
+      pool.query(`UPDATE urls SET clicks = clicks + 1 WHERE id = $1`, [url.id]),
+      // Insert analytics record
+      pool.query(
+        `INSERT INTO analytics (url_id, ip_address, user_agent, referrer)
+         VALUES ($1, $2, $3, $4)`,
+        [url.id, ipAddress, userAgent, referrer]
+      ),
+    ]);
 
     // Redirect to original URL
     redirect(url.original_url);
