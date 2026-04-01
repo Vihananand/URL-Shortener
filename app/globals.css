@@ -359,6 +359,40 @@ body {
   --sidebar-ring:       oklch(0.556 0 0);
 }
 
+/* Toast theming for nextjs-toast-notify */
+:root {
+  --toast-bg-color: rgba(15, 15, 15, 0.95);
+  --toast-text-color: rgba(255, 255, 255, 0.88);
+  --toast-close-color: rgba(255, 255, 255, 0.7);
+  --toast-success-color: #ffffff;
+  --toast-error-color: #ef4444;
+  --toast-warning-color: #f59e0b;
+  --toast-info-color: #22d3ee;
+  --toast-box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  --toast-border-radius: 12px;
+  --toast-font-size: 14px;
+  --toast-font-weight: 500;
+  --toast-padding: 10px 40px 10px 10px;
+  --toast-progress-height: 2px;
+  --toast-container-gap: 12px;
+  --toast-offset: 1rem;
+}
+
+.toast-nextjs {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.toast-nextjs .message .text {
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+
+.toast-nextjs.success .check {
+  color: #000;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

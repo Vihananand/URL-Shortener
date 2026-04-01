@@ -48,11 +48,6 @@ export default function CTA() {
                   Create Free Account <ArrowRight size={14} />
                 </Link>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.97 }}>
-                <Link href="/dashboard" className="btn-ghost px-7 py-3 text-sm">
-                  View Dashboard Demo
-                </Link>
-              </motion.div>
             </div>
           </div>
         </motion.div>
