@@ -6,7 +6,8 @@ import type { ShortenedUrl } from "@/types";
 import { timeAgo, truncateUrl, formatNumber } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import CopyButton from "@/components/ui/CopyButton";
-import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2, Link2 } from "lucide-react";
+import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2, Link2, BarChart3 } from "lucide-react";
+import AnalyticsView from "@/components/dashboard/AnalyticsView";
 
 interface UrlTableProps {
   urls: ShortenedUrl[];
@@ -18,6 +19,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "clicks" | "alpha">("newest");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [analyticsUrlId, setAnalyticsUrlId] = useState<string | null>(null);
 
   const filtered = urls
     .filter((u) =>
@@ -160,6 +162,13 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                   </a>
                   <div className="flex items-center gap-0.5">
                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                      onClick={() => setAnalyticsUrlId(url.id)}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-cyan-400 hover:bg-white/5 transition-all cursor-pointer"
+                      title="View analytics"
+                    >
+                      <BarChart3 size={12} strokeWidth={1.8} />
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                       onClick={() => handleToggleActive(url.id, url.isActive)}
                       className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
                         url.isActive ? "text-white/50 hover:text-white/80 hover:bg-white/6" : "text-white/25 hover:text-white/50 hover:bg-white/5"
@@ -180,5 +189,14 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
         </div>
       )}
     </div>
+    <>
+      {analyticsUrlId && (
+        <AnalyticsView
+          urlId={analyticsUrlId}
+          onClose={() => setAnalyticsUrlId(null)}
+        />
+      )}
+    </>
+    </>
   );
 }

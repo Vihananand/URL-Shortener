@@ -10,6 +10,12 @@ interface RouteParams {
   };
 }
 
+function getDeviceType(userAgent: string): "Desktop" | "Mobile" | "Tablet" {
+  if (/tablet|ipad|playbook|silk/i.test(userAgent)) return "Tablet";
+  if (/mobile|android|iphone|ipod|phone/i.test(userAgent)) return "Mobile";
+  return "Desktop";
+}
+
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const cookieStore = await cookies();
@@ -62,113 +68,115 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const url = urlResult.rows[0];
 
-    // Get analytics for this URL
-    const analyticsResult = await pool.query(
-      `SELECT
-        id,
-        clicked_at,
-        ip_address,
-        user_agent,
-        referrer,
-        CASE
-          WHEN user_agent LIKE '%Mobile%' THEN 'Mobile'
-          WHEN user_agent LIKE '%iPad%' THEN 'Tablet'
-          ELSE 'Desktop'
-        END as device_type
+    // Get analytics data
+    const analyticsData = await pool.query(
+      `SELECT id, ip_address, user_agent, referrer, created_at
        FROM analytics
        WHERE url_id = $1
-       ORDER BY clicked_at DESC
-       LIMIT 100`,
+       ORDER BY created_at DESC`,
       [id]
     );
 
-    // Get analytics summary
-    const summaryResult = await pool.query(
-      `SELECT
-        COUNT(*) as total_clicks,
-        COUNT(DISTINCT ip_address) as unique_visitors,
-        COUNT(DISTINCT DATE(clicked_at)) as days_with_clicks,
-        MAX(clicked_at) as last_clicked,
-        MIN(clicked_at) as first_clicked
-       FROM analytics
-       WHERE url_id = $1`,
-      [id]
+    const clicks = analyticsData.rows;
+    const uniqueIPs = new Set(clicks.map((c: any) => c.ip_address)).size;
+
+    // Calculate last clicked date
+    const lastClicked =
+      clicks.length > 0
+        ? new Date(clicks[0].created_at).toISOString()
+        : new Date().toISOString();
+
+    // Calculate first clicked date
+    const firstClicked =
+      clicks.length > 0
+        ? new Date(clicks[clicks.length - 1].created_at).toISOString()
+        : new Date().toISOString();
+
+    // Count days with clicks
+    const daysWithClicks = new Set(
+      clicks.map((c: any) =>
+        new Date(c.created_at).toLocaleDateString("en-US")
+      )
+    ).size;
+
+    // Device breakdown
+    const deviceBreakdown: Record<string, number> = {
+      Desktop: 0,
+      Mobile: 0,
+      Tablet: 0,
+    };
+
+    clicks.forEach((click: any) => {
+      const deviceType = getDeviceType(click.user_agent);
+      deviceBreakdown[deviceType]++;
+    });
+
+    // Top referrers
+    const referrerMap: Record<string, number> = {};
+    clicks.forEach((click: any) => {
+      const referrer = click.referrer || "Direct";
+      referrerMap[referrer] = (referrerMap[referrer] || 0) + 1;
+    });
+
+    const topReferrers = Object.entries(referrerMap)
+      .map(([referrer, count]) => ({ referrer, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Hourly clicks (last 24 hours)
+    const now = new Date();
+    const hourlyClicks: Record<string, number> = {};
+
+    for (let i = 23; i >= 0; i--) {
+      const hour = new Date(now.getTime() - i * 60 * 60 * 1000);
+      const hourKey = hour.toISOString().substring(0, 13);
+      hourlyClicks[hourKey] = 0;
+    }
+
+    clicks.forEach((click: any) => {
+      const clickTime = new Date(click.created_at);
+      const hourKey = clickTime.toISOString().substring(0, 13);
+      if (hourKey in hourlyClicks) {
+        hourlyClicks[hourKey]++;
+      }
+    });
+
+    const hourlyClicksArray = Object.entries(hourlyClicks).map(
+      ([hour, count]) => ({
+        hour,
+        count,
+      })
     );
 
-    // Get device breakdown
-    const deviceResult = await pool.query(
-      `SELECT
-        CASE
-          WHEN user_agent LIKE '%Mobile%' THEN 'Mobile'
-          WHEN user_agent LIKE '%iPad%' THEN 'Tablet'
-          ELSE 'Desktop'
-        END as device_type,
-        COUNT(*) as count
-       FROM analytics
-       WHERE url_id = $1
-       GROUP BY device_type`,
-      [id]
-    );
-
-    // Get referrer breakdown
-    const referrerResult = await pool.query(
-      `SELECT referrer, COUNT(*) as count
-       FROM analytics
-       WHERE url_id = $1 AND referrer IS NOT NULL
-       GROUP BY referrer
-       ORDER BY count DESC
-       LIMIT 10`,
-      [id]
-    );
-
-    // Get hourly clicks (last 24 hours)
-    const hourlyResult = await pool.query(
-      `SELECT
-        DATE_TRUNC('hour', clicked_at) as hour,
-        COUNT(*) as count
-       FROM analytics
-       WHERE url_id = $1 AND clicked_at > NOW() - INTERVAL '24 hours'
-       GROUP BY DATE_TRUNC('hour', clicked_at)
-       ORDER BY hour DESC`,
-      [id]
-    );
-
-    const summary = summaryResult.rows[0];
-    const clicks = analyticsResult.rows;
-    const devices = deviceResult.rows;
-    const referrers = referrerResult.rows;
-    const hourly = hourlyResult.rows;
+    // Recent clicks with device type
+    const recentClicks = clicks.slice(0, 50).map((click: any) => ({
+      id: click.id,
+      timestamp: click.created_at,
+      ipAddress: click.ip_address,
+      userAgent: click.user_agent,
+      referrer: click.referrer,
+      deviceType: getDeviceType(click.user_agent),
+    }));
 
     return NextResponse.json(
       {
         shortCode: url.short_code,
         summary: {
-          totalClicks: parseInt(summary.total_clicks),
-          uniqueVisitors: parseInt(summary.unique_visitors),
-          daysWithClicks: parseInt(summary.days_with_clicks),
-          lastClicked: summary.last_clicked,
-          firstClicked: summary.first_clicked,
+          totalClicks: url.clicks,
+          uniqueVisitors: uniqueIPs,
+          daysWithClicks,
+          lastClicked,
+          firstClicked,
         },
-        deviceBreakdown: devices.map((d) => ({
-          deviceType: d.device_type,
-          count: parseInt(d.count),
-        })),
-        topReferrers: referrers.map((r) => ({
-          referrer: r.referrer || "Direct",
-          count: parseInt(r.count),
-        })),
-        hourlyClicks: hourly.map((h) => ({
-          hour: h.hour,
-          count: parseInt(h.count),
-        })),
-        recentClicks: clicks.map((c) => ({
-          id: c.id,
-          timestamp: c.clicked_at,
-          ipAddress: c.ip_address,
-          userAgent: c.user_agent,
-          referrer: c.referrer,
-          deviceType: c.device_type,
-        })),
+        deviceBreakdown: Object.entries(deviceBreakdown).map(
+          ([deviceType, count]) => ({
+            deviceType,
+            count,
+          })
+        ),
+        topReferrers,
+        hourlyClicks: hourlyClicksArray,
+        recentClicks,
       },
       { status: 200 }
     );
