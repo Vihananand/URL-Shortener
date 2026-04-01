@@ -6,16 +6,16 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 import { showToast } from "nextjs-toast-notify";
 import { Link2, Mail, Lock } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const router = useRouter();
 
   const validate = () => {
     const e: typeof errors = {};
@@ -55,13 +55,13 @@ export default function SignInPage() {
         progress: true,
         position: "top-center",
         transition: "fadeIn",
-        icon: "❌",
+        icon: "X",
         sound: true,
       });
       return;
     }
 
-    router.push("/dashboard");
+    router.push(`/dashboard/${data.user.full_name}`);
     showToast.success(`${data.message}`, {
       duration: 4000,
       progress: true,

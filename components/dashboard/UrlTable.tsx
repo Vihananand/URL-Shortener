@@ -30,9 +30,44 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     setDeletingId(id);
-    setTimeout(() => { onDelete(id); setDeletingId(null); }, 280);
+    try {
+      const res = await fetch(`/api/urls/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) {
+        console.error("Failed to delete URL");
+        setDeletingId(null);
+        return;
+      }
+
+      setTimeout(() => { onDelete(id); setDeletingId(null); }, 280);
+    } catch (err) {
+      console.error("Error deleting URL:", err);
+      setDeletingId(null);
+    }
+  };
+
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/urls/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !currentStatus }),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to update URL");
+        return;
+      }
+
+      onToggleActive(id);
+    } catch (err) {
+      console.error("Error toggling URL:", err);
+    }
   };
 
   return (
@@ -51,6 +86,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
           />
         </div>
         <select
+          title="sort"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           className="bg-card2 border border-border text-white/60 rounded-xl py-2.5 px-4 text-sm outline-none cursor-pointer transition-all"
@@ -124,7 +160,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                   </a>
                   <div className="flex items-center gap-0.5">
                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                      onClick={() => onToggleActive(url.id)}
+                      onClick={() => handleToggleActive(url.id, url.isActive)}
                       className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
                         url.isActive ? "text-white/50 hover:text-white/80 hover:bg-white/6" : "text-white/25 hover:text-white/50 hover:bg-white/5"
                       }`}

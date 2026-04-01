@@ -54,7 +54,7 @@ export default function NotFound() {
           <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 gradient-bg text-white font-semibold px-7 py-3 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
+              className="inline-flex items-center gap-2 gradient-bg text-black font-semibold px-7 py-3 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M19 12H5M12 19l-7-7 7-7" />

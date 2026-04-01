@@ -40,18 +40,12 @@ export default function Hero() {
       <div className="absolute inset-0 dot-bg pointer-events-none" />
 
       {/* Radial fade overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 80% 70% at 50% 0%, transparent 0%, #080808 70%)" }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 100%, transparent 0%, #080808 80%)" }}
-      />
+      <div className="absolute inset-0 pointer-events-none gradient-overlay-top" />
+      <div className="absolute inset-0 pointer-events-none gradient-overlay-bottom" />
 
       {/* Subtle blob accents */}
-      <div className="blob animate-blob absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/[0.025] pointer-events-none" />
-      <div className="blob animate-blob animation-delay-2000 absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-white/[0.018] pointer-events-none" />
+      <div className="blob animate-blob absolute top-1/4 left-1/4 w-125 h-125 bg-white/2.5 pointer-events-none" />
+      <div className="blob animate-blob animation-delay-2000 absolute bottom-1/3 right-1/4 w-100 h-100 bg-white/[0.018] pointer-events-none" />
 
       <motion.div
         variants={stagger}

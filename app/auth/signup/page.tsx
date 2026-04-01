@@ -108,7 +108,7 @@ export default function SignUpPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(`/auth/signin`);
     showToast.success(`${data.message}`, {
       duration: 4000,
       progress: true,

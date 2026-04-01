@@ -17,12 +17,11 @@ export function proxy(req: NextRequest) {
     jwt.verify(token, secret);
     return NextResponse.next();
   } catch (err) {
+    console.log(err);
     return NextResponse.redirect(new URL("/auth/signin", req.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", ],
 };

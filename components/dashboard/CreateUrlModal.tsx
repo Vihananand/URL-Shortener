@@ -6,7 +6,6 @@ import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import type { ShortenedUrl } from "@/types";
-import { createMockUrl } from "@/lib/mockData";
 
 interface CreateUrlModalProps {
   isOpen: boolean;
@@ -41,15 +40,35 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
 
     setLoading(true);
     setErrors({});
-    // TODO: replace with API call — POST /api/urls { originalUrl: longUrl, customSlug }
-    await new Promise((r) => setTimeout(r, 600));
-    const normalised = longUrl.startsWith("http") ? longUrl : `https://${longUrl}`;
-    const newUrl = createMockUrl(normalised, customSlug || undefined);
-    onCreated(newUrl);
-    setLongUrl("");
-    setCustomSlug("");
-    setLoading(false);
-    onClose();
+
+    try {
+      const normalised = longUrl.startsWith("http") ? longUrl : `https://${longUrl}`;
+      const res = await fetch("/api/urls", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalUrl: normalised,
+          customSlug: customSlug || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ longUrl: data.message || "Failed to create URL" });
+        setLoading(false);
+        return;
+      }
+
+      onCreated(data.url);
+      setLongUrl("");
+      setCustomSlug("");
+      onClose();
+    } catch (err) {
+      setErrors({ longUrl: "An error occurred while creating the URL" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
