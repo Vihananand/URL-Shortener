@@ -15,7 +15,7 @@ export default function CTA() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="relative gradient-border-card p-10 sm:p-16 text-center overflow-hidden shadow-card"
         >
-          {/* Dot grid inside card */}
+          { /* Dot grid inside card */ }
           <div className="absolute inset-0 dot-bg rounded-2xl opacity-60" />
           {/* Vignette */}
           <div className="absolute inset-0 rounded-2xl" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 100%, #0f0f0f 0%, transparent 100%)" }} />
