@@ -7,8 +7,10 @@ import { timeAgo, truncateUrl, formatNumber } from "@/lib/utils";
 import { APP_DOMAIN } from "@/lib/site";
 import Badge from "@/components/ui/Badge";
 import CopyButton from "@/components/ui/CopyButton";
-import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2, Link2, BarChart3 } from "lucide-react";
+import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2, Link2, BarChart3, QrCode } from "lucide-react";
 import AnalyticsView from "@/components/dashboard/AnalyticsView";
+import QRCodeModal from "@/components/ui/QRCodeModal";
+import DeleteLinkModal from "@/components/dashboard/DeleteLinkModal";
 
 interface UrlTableProps {
   urls: ShortenedUrl[];
@@ -21,6 +23,8 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
   const [sortBy, setSortBy] = useState<"newest" | "clicks" | "alpha">("newest");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [analyticsUrlId, setAnalyticsUrlId] = useState<string | null>(null);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [linkToDelete, setLinkToDelete] = useState<string | null>(null);
 
   const filtered = urls
     .filter((u) =>
@@ -47,10 +51,15 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
         return;
       }
 
-      setTimeout(() => { onDelete(id); setDeletingId(null); }, 280);
+      setTimeout(() => { 
+        onDelete(id); 
+        setDeletingId(null); 
+        setLinkToDelete(null);
+      }, 280);
     } catch (err) {
       console.error("Error deleting URL:", err);
       setDeletingId(null);
+      setLinkToDelete(null);
     }
   };
 
@@ -170,15 +179,22 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                       <BarChart3 size={12} strokeWidth={1.8} />
                     </motion.button>
                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                      onClick={() => setQrUrl(url.shortUrl)}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-purple-400 hover:bg-white/5 transition-all cursor-pointer"
+                      title="QR Code"
+                    >
+                      <QrCode size={12} strokeWidth={1.8} />
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                       onClick={() => handleToggleActive(url.id, url.isActive)}
                       className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
-                        url.isActive ? "text-white/50 hover:text-white/80 hover:bg-white/6" : "text-white/25 hover:text-white/50 hover:bg-white/5"
+                        url.isActive ? "text-green-500 hover:text-green-400 hover:bg-green-500/10" : "text-red-500 hover:text-red-400 hover:bg-red-500/10"
                       }`}
                     >
                       {url.isActive ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                     </motion.button>
                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                      onClick={() => handleDelete(url.id)}
+                      onClick={() => setLinkToDelete(url.id)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all cursor-pointer">
                       <Trash2 size={12} strokeWidth={1.8} />
                     </motion.button>
@@ -195,6 +211,17 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
           onClose={() => setAnalyticsUrlId(null)}
         />
       )}
+      <QRCodeModal
+        isOpen={!!qrUrl}
+        url={qrUrl || ""}
+        onClose={() => setQrUrl(null)}
+      />
+      <DeleteLinkModal
+        isOpen={!!linkToDelete}
+        onClose={() => setLinkToDelete(null)}
+        onConfirm={() => linkToDelete && handleDelete(linkToDelete)}
+        isDeleting={!!deletingId && deletingId === linkToDelete}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import pool from "@/lib/db";
 
 export async function GET() {
   const token = (await cookies()).get("token")?.value;
@@ -9,10 +10,24 @@ export async function GET() {
     return NextResponse.json({ user: null });
   }
 
-  const decode = verifyToken(token);
-  if (!decode) {
+  const decode = verifyToken(token) as any;
+  if (!decode || !decode.email) {
     return NextResponse.json({ user: null });
   }
 
-  return NextResponse.json({ user: decode });
+  try {
+    const userResult = await pool.query(
+      "SELECT id, full_name, email FROM users WHERE email = $1",
+      [decode.email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return NextResponse.json({ user: null });
+    }
+
+    return NextResponse.json({ user: userResult.rows[0] });
+  } catch (err) {
+    console.error("Error fetching user in auth/me:", err);
+    return NextResponse.json({ user: null });
+  }
 }

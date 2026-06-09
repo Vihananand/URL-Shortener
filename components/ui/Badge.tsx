@@ -10,9 +10,9 @@ interface BadgeProps {
 
 const variantClasses: Record<BadgeVariant, string> = {
   active:
-    "bg-accent/15 text-accent border border-accent/30",
+    "bg-green-500/15 text-green-500 border border-green-500/30",
   inactive:
-    "bg-muted/15 text-muted border border-muted/20",
+    "bg-red-500/15 text-red-500 border border-red-500/30",
   info:
     "bg-primary/15 text-primary border border-primary/30",
   warning:
@@ -35,8 +35,8 @@ export default function Badge({
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          variant === "active" ? "bg-accent" : "",
-          variant === "inactive" ? "bg-muted" : "",
+          variant === "active" ? "bg-green-500" : "",
+          variant === "inactive" ? "bg-red-500" : "",
           variant === "info" ? "bg-primary" : "",
           variant === "warning" ? "bg-yellow-400" : ""
         )}

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Link2, X, Menu, ArrowRight, LogOut } from "lucide-react";
-import { showToast } from "nextjs-toast-notify";
+import { Link2, X, Menu, ArrowRight, ArrowLeft, LogOut } from "lucide-react";
+import { showToast } from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/#features", label: "Features" },
@@ -102,23 +102,7 @@ export default function Navbar() {
           </div>
         )}
 
-        {isDashboard && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleLogout}
-              className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <LogOut size={14} />
-              Logout
-            </button>
-            <Link
-              href="/dashboard"
-              className="text-sm text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
-            >
-              Dashboard
-            </Link>
-          </div>
-        )}
+        {/* Removed Dashboard link from center when already on Dashboard page */}
 
         {/* CTA */}
         <div className="flex items-center gap-2">
@@ -146,31 +130,25 @@ export default function Navbar() {
                     Sign Up
                   </Link>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleLogout}
-                      className="text-sm text-white/50 hover:text-white px-3 py-2 rounded-lg hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <LogOut size={14} />
-                      Logout
-                    </button>
-                    <Link
-                      href="/dashboard"
-                      className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5"
-                    >
-                      Dashboard
-                    </Link>
-                  </div>
+                  <Link
+                    href={user ? `/dashboard/${(user as any).full_name}` : "/dashboard"}
+                    className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5"
+                  >
+                    Dashboard
+                  </Link>
                 )}
               </motion.div>
             </>
           ) : (
-            <Link
-              href="/"
-              className="text-sm text-white/50 hover:text-white transition-colors px-3 py-1.5"
-            >
-              ← Home
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white/70 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white rounded-xl transition-all shadow-lg backdrop-blur-md cursor-pointer"
+              >
+                <ArrowLeft size={14} />
+                Home
+              </Link>
+            </motion.div>
           )}
 
           {!isDashboard && (
@@ -256,23 +234,12 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link
-                      href="/dashboard"
+                      href={user ? `/dashboard/${(user as any).full_name}` : "/dashboard"}
                       onClick={() => setMobileOpen(false)}
                       className="btn-primary text-sm text-center py-2.5 px-3"
                     >
                       Dashboard
                     </Link>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setMobileOpen(false);
-                        await handleLogout();
-                      }}
-                      className="px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <LogOut size={14} />
-                      Logout
-                    </button>
                   </>
                 )}
               </div>

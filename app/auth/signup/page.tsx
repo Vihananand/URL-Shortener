@@ -7,8 +7,9 @@ import { motion } from "motion/react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
-import { showToast } from "nextjs-toast-notify";
+import { showToast } from "@/components/ui/Toast";
 import { Link2, User, Mail, Lock, ShieldCheck } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 function PasswordStrength({ password }: { password: string }) {
   const strength = (() => {
@@ -119,6 +120,31 @@ export default function SignUpPage() {
     });
   };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setErrors({});
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        showToast.error(data.message || "Google authentication failed");
+        setLoading(false);
+        return;
+      }
+      
+      router.push(`/dashboard/${data.user.full_name}`);
+      showToast.success("Successfully signed up and authenticated with Google");
+    } catch (err) {
+      showToast.error("An error occurred during Google authentication");
+      setLoading(false);
+    }
+  };
+
   const clearErr = (field: string) =>
     setErrors((p) => {
       const n = { ...p };
@@ -209,6 +235,22 @@ export default function SignUpPage() {
               {loading ? "Creating account…" : "Create free account"}
             </Button>
           </form>
+
+          <div className="mt-6 mb-4 flex items-center justify-center gap-3">
+            <div className="h-px bg-white/10 flex-1" />
+            <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Or continue with</span>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => showToast.error("Google Login popup closed or failed")}
+              theme="filled_black"
+              shape="pill"
+              text="signup_with"
+            />
+          </div>
 
           <div className="mt-5 pt-5 border-t border-border text-center">
             <p className="text-sm text-white/40">

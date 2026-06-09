@@ -7,8 +7,9 @@ import { motion } from "motion/react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
-import { showToast } from "nextjs-toast-notify";
+import { showToast } from "@/components/ui/Toast";
 import { Link2, Mail, Lock } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -72,6 +73,31 @@ export default function SignInPage() {
     });
 
     setLoading(false);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setErrors({});
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        showToast.error(data.message || "Google authentication failed");
+        setLoading(false);
+        return;
+      }
+      
+      router.push(`/dashboard/${data.user.full_name}`);
+      showToast.success("Successfully authenticated with Google");
+    } catch (err) {
+      showToast.error("An error occurred during Google authentication");
+      setLoading(false);
+    }
   };
 
   return (
@@ -158,6 +184,22 @@ export default function SignInPage() {
               {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
+
+          <div className="mt-6 mb-4 flex items-center justify-center gap-3">
+            <div className="h-px bg-white/10 flex-1" />
+            <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Or continue with</span>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => showToast.error("Google Login popup closed or failed")}
+              theme="filled_black"
+              shape="pill"
+              text="signin_with"
+            />
+          </div>
 
           <div className="mt-5 pt-5 border-t border-border text-center">
             <p className="text-sm text-white/40">

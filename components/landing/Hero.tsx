@@ -54,13 +54,6 @@ export default function Hero() {
         animate="visible"
         className="relative z-10 max-w-2xl mx-auto text-center"
       >
-        {/* Eyebrow pill */}
-        <motion.div variants={up} className="inline-flex items-center gap-2 mb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-[11px] font-medium text-white/55 tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-ticker inline-block" />
-            Now with real-time analytics
-          </div>
-        </motion.div>
 
         {/* Headline */}
         <motion.h1

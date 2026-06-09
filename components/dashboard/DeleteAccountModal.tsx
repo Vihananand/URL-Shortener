@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
-import { showToast } from "nextjs-toast-notify";
+import { showToast } from "@/components/ui/Toast";
 
 interface DeleteAccountModalProps {
   isOpen: boolean;
