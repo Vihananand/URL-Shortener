@@ -1,4 +1,5 @@
 import pool from "@/lib/db";
+import { redis } from "@/lib/redis";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -12,18 +13,26 @@ interface RouteParams {
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = await params;
+    const cacheKey = `url:${slug}`;
 
-    // Find URL by short code
-    const result = await pool.query(
-      `SELECT id, original_url, is_active FROM urls WHERE short_code = $1`,
-      [slug]
-    );
+    // Try to get from Redis first
+    let url: any = await redis.get(cacheKey);
 
-    if (result.rows.length === 0) {
-      return NextResponse.redirect(new URL("/?error=link-not-found", req.url));
+    if (!url) {
+      // Find URL by short code in Postgres
+      const result = await pool.query(
+        `SELECT id, original_url, is_active FROM urls WHERE short_code = $1`,
+        [slug]
+      );
+
+      if (result.rows.length === 0) {
+        return NextResponse.redirect(new URL("/?error=link-not-found", req.url));
+      }
+
+      url = result.rows[0];
+      // Store in Redis (cache indefinitely, invalidate on update/delete)
+      await redis.set(cacheKey, url);
     }
-
-    const url = result.rows[0];
 
     // Check if URL is active
     if (!url.is_active) {

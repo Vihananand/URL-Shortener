@@ -1,4 +1,5 @@
 import pool from "@/lib/db";
+import { redis } from "@/lib/redis";
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -72,6 +73,9 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     );
 
     const url = updated.rows[0];
+
+    // Invalidate the cache for this URL
+    await redis.del(`url:${url.short_code}`);
 
     return NextResponse.json(
       {
@@ -149,6 +153,9 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     // Delete URL
     await pool.query("DELETE FROM urls WHERE id = $1", [id]);
+
+    // Invalidate the cache for this URL
+    await redis.del(`url:${urlResult.rows[0].short_code}`);
 
     return NextResponse.json(
       { message: "URL deleted successfully" },
