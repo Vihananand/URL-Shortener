@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Slicly — Smart URL Shortener",
+  title: "Slicly - Smart URL Shortener",
   description: "Shorten URLs, track clicks, and amplify your reach with Slicly.",
 };
 

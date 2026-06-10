@@ -233,7 +233,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
                   <XAxis
                     dataKey="hour"
                     stroke="rgba(255,255,255,0.3)"
-                    tickFormatter={(d) => new Date(d).toLocaleTimeString("en-US", { hour: "2-digit" })}
+                    tickFormatter={(d) => new Date(`${d}:00:00Z`).toLocaleTimeString("en-US", { hour: "2-digit" })}
                   />
                   <YAxis stroke="rgba(255,255,255,0.3)" />
                   <Tooltip
@@ -266,11 +266,10 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={analytics.deviceBreakdown}
+                    data={analytics.deviceBreakdown.map(d => ({ ...d, name: d.deviceType }))}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry: any) => `${entry.deviceType}: ${entry.count}`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
@@ -290,6 +289,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
                     }}
                     labelStyle={{ color: "#fff" }}
                   />
+                  <Legend layout="vertical" verticalAlign="middle" align="right" />
                 </PieChart>
               </ResponsiveContainer>
             </motion.div>
