@@ -32,7 +32,8 @@ export default function Input({ label, error, icon, rightElement, className, id,
             "focus:border-border2 focus:ring-1 focus:ring-white/10",
             icon ? "pl-10 pr-4" : "px-4",
             rightElement ? "pr-28" : "",
-            error ? "border-white/20 focus:border-white/30" : "",
+            error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+              : "",
             className
           )}
           {...props}
@@ -40,7 +41,7 @@ export default function Input({ label, error, icon, rightElement, className, id,
         {rightElement && <div className="absolute right-2">{rightElement}</div>}
       </div>
       {error && (
-        <p className="mt-1.5 text-xs text-white/40">{error}</p>
+        <p className="mt-1.5 text-xs text-red-500">{error}</p>
       )}
     </div>
   );

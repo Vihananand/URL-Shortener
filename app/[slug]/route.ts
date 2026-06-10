@@ -21,7 +21,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     if (!url) {
       // Find URL by short code in Postgres
       const result = await pool.query(
-        `SELECT id, original_url, is_active FROM urls WHERE short_code = $1`,
+        `SELECT id, original_url, is_active, expires_at, max_clicks, clicks FROM urls WHERE short_code = $1`,
         [slug]
       );
 
@@ -39,6 +39,16 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       return NextResponse.redirect(new URL("/?error=link-disabled", req.url));
     }
 
+    // Check expiration date
+    if (url.expires_at && new Date() > new Date(url.expires_at)) {
+      return NextResponse.redirect(new URL("/?error=link-expired", req.url));
+    }
+
+    // Check max clicks
+    if (url.max_clicks !== null && url.clicks >= url.max_clicks) {
+      return NextResponse.redirect(new URL("/?error=max-clicks-reached", req.url));
+    }
+
     // Get request headers for analytics
     const headersList = await headers();
     const ipAddress =
@@ -51,7 +61,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     // Record analytics in parallel with click increment
     await Promise.all([
-      // Update click count
+      // Update click count in PG
       pool.query(`UPDATE urls SET clicks = clicks + 1 WHERE id = $1`, [url.id]),
       // Insert analytics record
       pool.query(
@@ -59,6 +69,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
          VALUES ($1, $2, $3, $4)`,
         [url.id, ipAddress, userAgent, referrer]
       ),
+      // Update cache click count if enforcing max_clicks to prevent bypass
+      url.max_clicks !== null ? redis.set(cacheKey, { ...url, clicks: url.clicks + 1 }) : Promise.resolve(),
     ]);
 
     // Redirect to original URL

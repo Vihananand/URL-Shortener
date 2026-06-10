@@ -56,7 +56,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { originalUrl, customSlug } = await req.json();
+    const { originalUrl, customSlug, deleteAfter24h, customExpiryDate, maxClicks, securedRedirect } = await req.json();
+
+    // VirusTotal Security Check
+    if (securedRedirect && process.env.VIRUSTOTAL_API_KEY) {
+      // Base64URL encode the URL per VT docs
+      const urlId = Buffer.from(originalUrl).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+      try {
+        const vtRes = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
+        });
+        
+        if (vtRes.ok) {
+          const vtData = await vtRes.json();
+          const maliciousCount = vtData.data?.attributes?.last_analysis_stats?.malicious || 0;
+          if (maliciousCount > 0) {
+            return withSecurityHeaders(NextResponse.json({ 
+              message: "This link is flagged as malicious. You can turn off 'Secured Redirect' in advanced options to bypass this check." 
+            }, { status: 400 }));
+          }
+        }
+      } catch (e) {
+        console.error("VT check failed", e);
+      }
+    }
 
     // Input validation
     if (!originalUrl) {
@@ -126,12 +149,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Determine Expiry Date
+    let finalExpiresAt: Date | null = null;
+    if (deleteAfter24h) {
+      finalExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    } else if (customExpiryDate) {
+      finalExpiresAt = new Date(customExpiryDate);
+    }
+
     // Insert new URL
     const result = await pool.query(
-      `INSERT INTO urls (user_id, original_url, short_code, clicks, is_active, created_at)
-       VALUES ($1, $2, $3, 0, true, CURRENT_TIMESTAMP)
+      `INSERT INTO urls (user_id, original_url, short_code, clicks, is_active, created_at, expires_at, max_clicks)
+       VALUES ($1, $2, $3, 0, true, CURRENT_TIMESTAMP, $4, $5)
        RETURNING id, original_url, short_code, clicks, is_active, created_at`,
-      [userId, originalUrl, shortCode]
+      [userId, originalUrl, shortCode, finalExpiresAt, maxClicks || null]
     );
 
     const url = result.rows[0];
