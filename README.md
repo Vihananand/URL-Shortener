@@ -1,6 +1,6 @@
 # Slicly — URL Shortener
 
-A URL shortener web application with a marketing landing page and a full link-management dashboard. Built as a polished frontend prototype — all data is mocked client-side, with clear `TODO` markers where real API calls should be wired in.
+A full-stack URL shortener web application with a marketing landing page and a comprehensive link-management dashboard. Built with Next.js App Router, PostgreSQL, and Redis.
 
 ## Tech Stack
 
@@ -11,6 +11,9 @@ A URL shortener web application with a marketing landing page and a full link-ma
 | UI | React 19 |
 | Styling | Tailwind CSS v4 |
 | Animations | Motion (Framer Motion) v12 |
+| Database | PostgreSQL (pg) |
+| Caching & Rate Limiting | Redis (@upstash/redis) |
+| Authentication | Custom JWT & Google OAuth |
 | Fonts | Geist Sans + Geist Mono |
 
 ## Features
@@ -18,8 +21,9 @@ A URL shortener web application with a marketing landing page and a full link-ma
 - **Hero shortener** — paste a URL on the landing page and instantly get a `slicely.in/<code>` short link with one-click copy
 - **Dashboard** — manage all your links with search, sort, toggle active/inactive, delete, and copy-to-clipboard
 - **Create Link Modal** — custom slug support, URL validation, and a live `slicely.in/<slug>` preview
-- **Auth pages** — sign-in and sign-up forms with validation, password strength indicator, and loading states
-- **Animated stats bar** — count-up animation (1.2M links, 500M clicks, 50K users, 99.9% uptime) triggered on scroll
+- **Auth pages** — secure sign-in and sign-up with email/password and Google OAuth support
+- **Real-time analytics** — track clicks, active links, and engagement metrics
+- **Security** — integration with VirusTotal API for URL safety scanning
 - **Responsive Navbar** — scroll-aware frosted glass effect with a mobile hamburger menu
 - **Design system** — reusable `Button`, `Input`, `Modal`, `Badge`, and `CopyButton` primitives, all motion-animated
 
@@ -35,8 +39,27 @@ A URL shortener web application with a marketing landing page and a full link-ma
 
 ## Getting Started
 
+1. Clone the repository and install dependencies:
+
 ```bash
 npm install
+```
+
+2. Create a `.env` file in the root directory and add the following environment variables:
+
+```env
+JWT_SECRET_KEY=your_jwt_secret
+NEON_CONNECTION_STRING=your_postgres_connection_string
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+VIRUSTOTAL_API_KEY=your_virustotal_api_key
+```
+
+3. Start the development server:
+
+```bash
 npm run dev
 ```
 
@@ -51,12 +74,18 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 | `npm start` | Serve production build |
 | `npm run lint` | Run ESLint |
 
-## Planned API Endpoints
+## API Endpoints
 
-The following endpoints are marked with `TODO` comments and are ready to be implemented:
+The application includes several core API routes to handle authentication, URLs, and analytics:
 
-| Method | Endpoint | Used by |
-| --- | --- | --- |
-| `POST` | `/api/urls` | Landing hero shortener, Create Link Modal |
-| `POST` | `/api/auth/signin` | Sign-in page |
-| `POST` | `/api/auth/signup` | Sign-up page |
+| Endpoint | Description |
+| --- | --- |
+| `/api/urls` | Create and fetch short URLs |
+| `/api/signin` | Authenticate user via email/password |
+| `/api/signup` | Register new user via email/password |
+| `/api/auth/google` | Authenticate user via Google OAuth |
+| `/api/auth/me` | Fetch current authenticated user |
+| `/api/dashboard` | Dashboard link statistics and data |
+| `/api/public-stats` | Public platform statistics (e.g. total links, clicks) |
+| `/api/account` | Manage user account settings |
+| `/api/logout` | Clear authentication tokens |
