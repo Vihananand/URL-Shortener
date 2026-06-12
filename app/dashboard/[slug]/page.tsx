@@ -233,41 +233,39 @@ export default function DashboardPage() {
         onConfirm={handleDeleteAccount}
       />
 
-      {/* Bottom Left Actions */}
-      <div className="fixed bottom-6 left-0 right-0 z-40 pointer-events-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-start">
-          <div className="flex flex-row gap-3 pointer-events-auto">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 bg-card border border-border text-text hover:bg-white/5 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer"
+      {/* Bottom Actions */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-8">
+        <div className="flex flex-col sm:flex-row gap-3 border-t border-white/5 pt-8 mt-12">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 bg-card border border-border text-text hover:bg-white/5 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer w-full sm:w-auto"
+          >
+            <LogOut size={16} />
+            Logout
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setDeleteAccountModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer w-full sm:w-auto"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
             >
-              <LogOut size={16} />
-              Logout
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setDeleteAccountModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
-              Delete Account
-            </motion.button>
-          </div>
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            Delete Account
+          </motion.button>
         </div>
       </div>
     </div>

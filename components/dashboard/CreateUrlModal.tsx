@@ -232,12 +232,12 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-center gap-3 pt-4">
           <Button
             variant="ghost"
             type="button"
             onClick={onClose}
-            className="flex-1"
+            className="w-full sm:flex-1"
           >
             Cancel
           </Button>
@@ -245,7 +245,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
             variant="primary"
             type="submit"
             loading={loading}
-            className="flex-1"
+            className="w-full sm:flex-1"
           >
             {loading ? "Creating…" : "Create short link"}
           </Button>
