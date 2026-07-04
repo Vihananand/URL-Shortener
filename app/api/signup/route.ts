@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { validators, sanitizeEmail } from "@/lib/validators";
-import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 
 // Rate limiter: 5 signup attempts per 15 minutes per IP
 const signupLimiter = createRateLimiter({
@@ -14,6 +14,10 @@ const signupLimiter = createRateLimiter({
 
 export async function POST(req: NextRequest) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
     // Get client IP for rate limiting
     const ip =
       req.headers.get("x-forwarded-for") ||

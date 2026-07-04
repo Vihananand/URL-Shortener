@@ -39,7 +39,17 @@ export const validators = {
 
   url: (url: string): ValidationResult => {
     try {
-      const urlObj = new URL(url.startsWith("http") ? url : `https://${url}`);
+      // Check if it already has a protocol, otherwise try to parse by assuming https
+      const hasProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+      const urlToParse = hasProtocol ? url : `https://${url}`;
+      
+      const urlObj = new URL(urlToParse);
+      
+      // Strictly enforce http or https
+      if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+        return { valid: false, error: "Only http and https protocols are allowed" };
+      }
+
       // Block localhost and private IPs
       if (
         urlObj.hostname === "localhost" ||

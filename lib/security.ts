@@ -66,3 +66,20 @@ export function sanitizeErrorMessage(error: any): string {
   }
   return "An error occurred";
 }
+
+// Verify Origin for CSRF protection
+export function verifyOrigin(req: NextRequest): boolean {
+  // If no Origin or Referer header is present, it's safer to block state-changing requests
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  
+  const expectedOrigin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  
+  if (origin && origin === expectedOrigin) return true;
+  if (origin && origin === "http://localhost:3000") return true; // Allow dev environment
+  
+  if (referer && referer.startsWith(expectedOrigin)) return true;
+  if (referer && referer.startsWith("http://localhost:3000")) return true;
+
+  return false;
+}

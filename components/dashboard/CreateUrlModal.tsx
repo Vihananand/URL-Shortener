@@ -7,7 +7,8 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import type { ShortenedUrl } from "@/types";
 import { APP_DOMAIN } from "@/lib/site";
-import { ChevronDown, ShieldCheck, Clock, MousePointer2, Settings2, ShieldAlert } from "lucide-react";
+import { ChevronDown, ShieldCheck, Clock, MousePointer2, Settings2, ShieldAlert, ArrowRight, Lock } from "lucide-react";
+import Link from "next/link";
 
 interface CreateUrlModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
   const [deleteAfter24h, setDeleteAfter24h] = useState(false);
   const [customExpiryDate, setCustomExpiryDate] = useState("");
   const [maxClicks, setMaxClicks] = useState("");
-  const [securedRedirect, setSecuredRedirect] = useState(true);
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ longUrl?: string; customSlug?: string }>({});
 
@@ -59,7 +60,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
           deleteAfter24h,
           customExpiryDate: customExpiryDate || undefined,
           maxClicks: maxClicks ? parseInt(maxClicks) : undefined,
-          securedRedirect,
+          password: password || undefined,
         }),
       });
 
@@ -77,7 +78,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
       setDeleteAfter24h(false);
       setCustomExpiryDate("");
       setMaxClicks("");
-      setSecuredRedirect(true);
+      setPassword("");
       setShowAdvanced(false);
       onClose();
     } catch (err) {
@@ -153,7 +154,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                 className="overflow-hidden"
               >
                 <div className="pt-4 flex flex-col gap-4 border-t border-white/5 mt-4">
-                  {/* Security Toggle */}
+                  {/* Security Info */}
                   <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/20 rounded-md">
@@ -161,26 +162,10 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                       </div>
                       <div>
                         <p className="text-sm text-white font-medium">Secured Redirect</p>
-                        <p className="text-xs text-white/50">Checks link for malicious activity</p>
+                        <p className="text-xs text-white/50">Controlled via <Link href="/dashboard/settings" onClick={onClose} className="text-primary hover:underline">Account Settings</Link></p>
                       </div>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={securedRedirect}
-                        onChange={(e) => setSecuredRedirect(e.target.checked)}
-                      />
-                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white peer-checked:after:bg-zinc-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
                   </div>
-                  
-                  {!securedRedirect && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs">
-                      <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-                      <p>Security checks are disabled. This link will be created without verifying if it is malicious.</p>
-                    </div>
-                  )}
 
                   {/* 24h Expiry Toggle */}
                   <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5">
@@ -225,6 +210,15 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                     value={maxClicks}
                     onChange={(e) => setMaxClicks(e.target.value)}
                     icon={<MousePointer2 size={16} strokeWidth={2} />}
+                  />
+
+                  <Input
+                    label="Password Protection (Optional)"
+                    type="text"
+                    placeholder="e.g. secret123"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    icon={<Lock size={16} strokeWidth={2} />}
                   />
                 </div>
               </motion.div>

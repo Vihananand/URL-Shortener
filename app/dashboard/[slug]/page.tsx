@@ -8,14 +8,12 @@ import UrlTable from "@/components/dashboard/UrlTable";
 import { motion, AnimatePresence } from "motion/react";
 import StatsCards from "@/components/dashboard/StatsCards";
 import CreateUrlModal from "@/components/dashboard/CreateUrlModal";
-import DeleteAccountModal from "@/components/dashboard/DeleteAccountModal";
 import { showToast } from "@/components/ui/Toast";
 import { LogOut } from "lucide-react";
 
 export default function DashboardPage() {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const params = useParams();
   const router = useRouter();
@@ -83,10 +81,6 @@ export default function DashboardPage() {
     );
   };
 
-  const handleDeleteAccount = async () => {
-    // Handled in DeleteAccountModal component
-    setDeleteAccountModalOpen(false);
-  };
 
   const handleLogout = async () => {
     try {
@@ -227,11 +221,6 @@ export default function DashboardPage() {
         onCreated={handleCreated}
       />
 
-      <DeleteAccountModal
-        isOpen={deleteAccountModalOpen}
-        onClose={() => setDeleteAccountModalOpen(false)}
-        onConfirm={handleDeleteAccount}
-      />
 
       {/* Bottom Actions */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-8">
@@ -248,8 +237,8 @@ export default function DashboardPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setDeleteAccountModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer w-full sm:w-auto"
+            onClick={() => router.push("/dashboard/settings")}
+            className="flex items-center justify-center gap-2 bg-card border border-border text-text hover:bg-white/5 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg transition-colors cursor-pointer w-full sm:w-auto"
           >
             <svg
               width="16"
@@ -259,12 +248,10 @@ export default function DashboardPage() {
               stroke="currentColor"
               strokeWidth="2.5"
             >
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              <line x1="10" y1="11" x2="10" y2="17" />
-              <line x1="14" y1="11" x2="14" y2="17" />
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
-            Delete Account
+            Settings
           </motion.button>
         </div>
       </div>

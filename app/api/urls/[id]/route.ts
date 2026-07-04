@@ -5,6 +5,14 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { APP_URL } from "@/lib/site";
+import { createRateLimiter } from "@/lib/rateLimiter";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
+
+// Rate limiter: 50 URL deletes per hour per user
+const deleteUrlLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  maxRequests: 50,
+});
 
 interface RouteParams {
   params: Promise<{
@@ -14,6 +22,10 @@ interface RouteParams {
 
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   try {
+    if (!verifyOrigin(req)) {
+      return NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 });
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -103,22 +115,32 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      return NextResponse.json(
+      return withSecurityHeaders(NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
-      );
+      ));
     }
 
     const decoded = verifyToken(token) as JwtPayload;
-    if (!decoded) {
-      return NextResponse.json(
+    if (!decoded || !decoded.email) {
+      return withSecurityHeaders(NextResponse.json(
         { message: "Invalid Token" },
         { status: 401 }
-      );
+      ));
+    }
+
+    // Rate limit by user email
+    const limitCheck = deleteUrlLimiter.checkLimit(`delete-url-${decoded.email}`);
+    if (!limitCheck.allowed) {
+      return withSecurityHeaders(NextResponse.json({ message: "Rate limit exceeded" }, { status: 429 }));
     }
 
     const { id } = await params;
@@ -157,15 +179,15 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     // Invalidate the cache for this URL
     await redis.del(`url:${urlResult.rows[0].short_code}`);
 
-    return NextResponse.json(
+    return withSecurityHeaders(NextResponse.json(
       { message: "URL deleted successfully" },
       { status: 200 }
-    );
+    ));
   } catch (err) {
     console.error(err);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
+    return withSecurityHeaders(NextResponse.json(
+      { message: sanitizeErrorMessage(err) },
       { status: 500 }
-    );
+    ));
   }
 }

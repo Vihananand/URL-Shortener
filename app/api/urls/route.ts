@@ -6,8 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { validators } from "@/lib/validators";
-import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 import { APP_URL } from "@/lib/site";
+import bcrypt from "bcrypt";
 
 // Rate limiter: 30 URL creations per hour per user
 const createUrlLimiter = createRateLimiter({
@@ -23,6 +24,10 @@ const getUrlsLimiter = createRateLimiter({
 
 export async function POST(req: NextRequest) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -56,30 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { originalUrl, customSlug, deleteAfter24h, customExpiryDate, maxClicks, securedRedirect } = await req.json();
-
-    // VirusTotal Security Check
-    if (securedRedirect && process.env.VIRUSTOTAL_API_KEY) {
-      // Base64URL encode the URL per VT docs
-      const urlId = Buffer.from(originalUrl).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-      try {
-        const vtRes = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
-          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
-        });
-        
-        if (vtRes.ok) {
-          const vtData = await vtRes.json();
-          const maliciousCount = vtData.data?.attributes?.last_analysis_stats?.malicious || 0;
-          if (maliciousCount > 0) {
-            return withSecurityHeaders(NextResponse.json({ 
-              message: "This link is flagged as malicious. You can turn off 'Secured Redirect' in advanced options to bypass this check." 
-            }, { status: 400 }));
-          }
-        }
-      } catch (e) {
-        console.error("VT check failed", e);
-      }
-    }
+    const { originalUrl, customSlug, deleteAfter24h, customExpiryDate, maxClicks, password } = await req.json();
 
     // Input validation
     if (!originalUrl) {
@@ -91,8 +73,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Normalize URL
+    const hasProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(originalUrl);
+    const normalizedUrl = hasProtocol ? originalUrl : `https://${originalUrl}`;
+
+    // Get user from DB first to check their settings
+    const userResult = await pool.query(
+      "SELECT id, is_virus_total_scan_enabled FROM users WHERE email = $1",
+      [decoded.email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return withSecurityHeaders(NextResponse.json({ message: "User not found" }, { status: 404 }));
+    }
+
+    const userId = userResult.rows[0].id;
+    const isScanEnabled = userResult.rows[0].is_virus_total_scan_enabled !== false;
+
+    // VirusTotal Security Check
+    if (isScanEnabled && process.env.VIRUSTOTAL_API_KEY) {
+      // Base64URL encode the URL per VT docs
+      const urlId = Buffer.from(normalizedUrl).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+      try {
+        const vtRes = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
+        });
+        
+        if (vtRes.ok) {
+          const vtData = await vtRes.json();
+          const maliciousCount = vtData.data?.attributes?.last_analysis_stats?.malicious || 0;
+          if (maliciousCount > 0) {
+            return withSecurityHeaders(NextResponse.json({ 
+              message: "This link is flagged as malicious. You can turn off 'Secured Redirect' in your account settings to bypass this check." 
+            }, { status: 400 }));
+          }
+        }
+      } catch (e) {
+        console.error("VT check failed", e);
+      }
+    }
+
     // Validate URL
-    const urlValidation = validators.url(originalUrl);
+    const urlValidation = validators.url(normalizedUrl);
     if (!urlValidation.valid) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -115,22 +137,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Get user ID
-    const userResult = await pool.query(
-      "SELECT id FROM users WHERE email = $1",
-      [decoded.email]
-    );
-
-    if (userResult.rows.length === 0) {
-      return withSecurityHeaders(
-        NextResponse.json(
-          { message: "User not found" },
-          { status: 404 }
-        )
-      );
-    }
-
-    const userId = userResult.rows[0].id;
+    // User ID is already fetched above as userId
     const shortCode = customSlug || generateShortCode();
 
     // Check if custom slug already exists
@@ -157,12 +164,17 @@ export async function POST(req: NextRequest) {
       finalExpiresAt = new Date(customExpiryDate);
     }
 
+    let passwordHash = null;
+    if (password && typeof password === "string" && password.trim().length > 0) {
+      passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+
     // Insert new URL
     const result = await pool.query(
-      `INSERT INTO urls (user_id, original_url, short_code, clicks, is_active, created_at, expires_at, max_clicks)
-       VALUES ($1, $2, $3, 0, true, CURRENT_TIMESTAMP, $4, $5)
+      `INSERT INTO urls (user_id, original_url, short_code, clicks, is_active, created_at, expires_at, max_clicks, password_hash)
+       VALUES ($1, $2, $3, 0, true, CURRENT_TIMESTAMP, $4, $5, $6)
        RETURNING id, original_url, short_code, clicks, is_active, created_at`,
-      [userId, originalUrl, shortCode, finalExpiresAt, maxClicks || null]
+      [userId, normalizedUrl, shortCode, finalExpiresAt, maxClicks || null, passwordHash]
     );
 
     const url = result.rows[0];

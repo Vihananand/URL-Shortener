@@ -2,15 +2,44 @@ import { OAuth2Client } from "google-auth-library";
 import pool from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sanitizeEmail } from "@/lib/validators";
+import { createRateLimiter } from "@/lib/rateLimiter";
+import { redis } from "@/lib/redis";
+import { sendEmailOTP } from "@/lib/email";
 
 const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
+// Rate limiter: 10 login attempts per 15 minutes per IP
+const googleAuthLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 10,
+});
+
 export async function POST(req: NextRequest) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
+    const ip =
+      req.headers.get("x-forwarded-for") ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+
+    // Check rate limit by IP
+    const ipLimitCheck = googleAuthLimiter.checkLimit(`google-auth-${ip}`);
+    if (!ipLimitCheck.allowed) {
+      const res = NextResponse.json(
+        { message: "Too many login attempts. Please try again later." },
+        { status: 429 }
+      );
+      res.headers.set("Retry-After", String(Math.ceil((ipLimitCheck.resetTime - Date.now()) / 1000)));
+      return withSecurityHeaders(res);
+    }
+
     const body = await req.json();
     const credential = body.credential;
 
@@ -38,7 +67,7 @@ export async function POST(req: NextRequest) {
     const name = payload.name || "Google User";
     
     // Check if user exists
-    const existingUser = await pool.query("SELECT id, full_name, email FROM users WHERE LOWER(email) = $1", [email.toLowerCase()]);
+    const existingUser = await pool.query("SELECT id, full_name, email, is_2fa_enabled, two_factor_method FROM users WHERE LOWER(email) = $1", [email.toLowerCase()]);
     
     let user;
 
@@ -61,6 +90,28 @@ export async function POST(req: NextRequest) {
     const secret = process.env.JWT_SECRET_KEY;
     if (!secret) {
       return withSecurityHeaders(NextResponse.json({ message: "Server configuration error" }, { status: 500 }));
+    }
+
+    if (user.is_2fa_enabled) {
+      const tempToken = jwt.sign(
+        { email: user.email, type: "2fa_pending" },
+        secret,
+        { expiresIn: "10m" }
+      );
+      
+      // Only send OTP immediately if email is the ONLY method enabled
+      if (user.two_factor_method === "email") {
+        const otp = crypto.randomInt(100000, 999999).toString();
+        await redis.set(`email_2fa:${user.email}`, otp, { ex: 300 });
+        await sendEmailOTP(user.email, otp);
+      }
+      
+      return withSecurityHeaders(NextResponse.json({
+        message: "2FA Required",
+        requires2FA: true,
+        method: user.two_factor_method, // "totp", "email", or "both"
+        tempToken,
+      }));
     }
 
     // Generate JWT

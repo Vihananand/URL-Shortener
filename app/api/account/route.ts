@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { createRateLimiter } from "@/lib/rateLimiter";
-import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 
 // Rate limiter: 2 account deletion attempts per day per user
 const deleteAccountLimiter = createRateLimiter({
@@ -12,8 +12,13 @@ const deleteAccountLimiter = createRateLimiter({
   maxRequests: 2,
 });
 
+
 export async function DELETE(req: NextRequest) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
@@ -111,5 +116,40 @@ export async function DELETE(req: NextRequest) {
       { status: 500 }
     );
     return withSecurityHeaders(res);
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return withSecurityHeaders(NextResponse.json({ message: "Unauthorized" }, { status: 401 }));
+    }
+
+    const decoded = verifyToken(token) as JwtPayload;
+    if (!decoded || !decoded.email) {
+      return withSecurityHeaders(NextResponse.json({ message: "Invalid Token" }, { status: 401 }));
+    }
+
+    const body = await req.json();
+    
+    // Check if we're updating is_virus_total_scan_enabled
+    if (typeof body.is_virus_total_scan_enabled !== "undefined") {
+      await pool.query(
+        "UPDATE users SET is_virus_total_scan_enabled = $1 WHERE email = $2",
+        [body.is_virus_total_scan_enabled, decoded.email]
+      );
+    }
+
+    return withSecurityHeaders(NextResponse.json({ message: "Settings updated successfully" }, { status: 200 }));
+  } catch (err) {
+    console.error("Account update error:", err);
+    return withSecurityHeaders(NextResponse.json({ message: sanitizeErrorMessage(err) }, { status: 500 }));
   }
 }

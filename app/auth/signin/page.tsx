@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/components/ui/Toast";
-import { Link2, Mail, Lock } from "lucide-react";
+import { Link2, Mail, Lock, Smartphone } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 
 export default function SignInPage() {
@@ -17,6 +17,14 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // 2FA states
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
+  const [tempToken, setTempToken] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   const validate = () => {
     const e: typeof errors = {};
@@ -62,6 +70,14 @@ export default function SignInPage() {
       return;
     }
 
+    if (data.requires2FA) {
+      setRequires2FA(true);
+      setTwoFactorMethod(data.method);
+      setTempToken(data.tempToken);
+      setLoading(false);
+      return;
+    }
+
     router.push(`/dashboard/${data.user.full_name}`);
     showToast.success(`${data.message}`, {
       duration: 4000,
@@ -73,6 +89,39 @@ export default function SignInPage() {
     });
 
     setLoading(false);
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!otp || otp.length < 6) {
+      setErrors({ otp: "Enter a valid code" });
+      return;
+    }
+    
+    setVerifying(true);
+    setErrors({});
+    
+    try {
+      const res = await fetch("/api/2fa/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tempToken, code: otp, method: selectedMethod || twoFactorMethod }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        showToast.success("Verification successful");
+        router.push(`/dashboard/${data.user.full_name}`);
+      } else {
+        setErrors({ otp: data.message || "Invalid code" });
+        showToast.error(data.message || "Invalid code");
+      }
+    } catch (err) {
+      showToast.error("An error occurred during verification");
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
@@ -88,6 +137,13 @@ export default function SignInPage() {
       
       if (!res.ok) {
         showToast.error(data.message || "Google authentication failed");
+        setLoading(false);
+        return;
+      }
+      if (data.requires2FA) {
+        setRequires2FA(true);
+        setTwoFactorMethod(data.method);
+        setTempToken(data.tempToken);
         setLoading(false);
         return;
       }
@@ -136,7 +192,120 @@ export default function SignInPage() {
           transition={{ duration: 0.45, delay: 0.1 }}
           className="gradient-border-card p-7 shadow-card mb-5"
         >
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {requires2FA ? (
+            twoFactorMethod === "both" && !selectedMethod ? (
+              <div className="flex flex-col gap-4">
+                <div className="text-center mb-2">
+                  <p className="text-sm text-white/70">Choose a verification method</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod("totp")}
+                  className="flex flex-col items-center gap-3 p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-white/5 transition-all text-center w-full"
+                >
+                  <Smartphone size={24} className="text-primary" />
+                  <div className="font-semibold text-white text-sm">Authenticator App</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const res = await fetch("/api/2fa/send-email-otp", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ tempToken })
+                      });
+                      if (res.ok) {
+                        showToast.success("OTP sent to your email");
+                        setSelectedMethod("email");
+                      } else {
+                        const data = await res.json();
+                        showToast.error(data.message || "Failed to send email");
+                      }
+                    } catch (e) {
+                      showToast.error("Failed to send email");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="flex flex-col items-center gap-3 p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-white/5 transition-all text-center w-full disabled:opacity-50"
+                >
+                  <Mail size={24} className="text-primary" />
+                  <div className="font-semibold text-white text-sm">{loading ? "Sending..." : "Email OTP"}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRequires2FA(false);
+                    setTwoFactorMethod(null);
+                    setTempToken(null);
+                  }}
+                  className="text-sm text-white/50 hover:text-white mt-2 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleVerify2FA} className="flex flex-col gap-4">
+                <div className="text-center mb-2">
+                  <p className="text-sm text-white/70">
+                    {(selectedMethod || twoFactorMethod) === "totp" 
+                      ? "Enter the code from your authenticator app"
+                      : "We've sent a code to your email"}
+                  </p>
+                </div>
+                <Input
+                  label="Verification Code"
+                  type="text"
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  error={errors.otp}
+                  icon={<Lock size={15} strokeWidth={1.8} />}
+                  autoComplete="one-time-code"
+                  autoFocus
+                />
+                <Button
+                  variant="primary"
+                  type="submit"
+                  loading={verifying}
+                  size="lg"
+                  className="w-full mt-1"
+                >
+                  {verifying ? "Verifying..." : "Verify & Sign in"}
+                </Button>
+                {twoFactorMethod === "both" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMethod(null);
+                      setOtp("");
+                      setErrors({});
+                    }}
+                    className="text-sm text-white/50 hover:text-white mt-2 transition-colors"
+                  >
+                    Choose a different method
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequires2FA(false);
+                      setOtp("");
+                      setErrors({});
+                    }}
+                    className="text-sm text-white/50 hover:text-white mt-2 transition-colors"
+                  >
+                    Back to login
+                  </button>
+                )}
+              </form>
+            )
+          ) : (
+            <>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="Email address"
               type="email"
@@ -212,6 +381,8 @@ export default function SignInPage() {
               </Link>
             </p>
           </div>
+          </>
+          )}
         </motion.div>
 
         <motion.p

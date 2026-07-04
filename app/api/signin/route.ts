@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { validators, sanitizeEmail } from "@/lib/validators";
-import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
+import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 
 // Rate limiter: 10 login attempts per 15 minutes per IP
 const loginLimiter = createRateLimiter({
@@ -14,9 +14,16 @@ const loginLimiter = createRateLimiter({
 
 // Track failed attempts per email for account lockout
 const failedAttempts: { [email: string]: { count: number; lastAttempt: number } } = {};
+import { redis } from "@/lib/redis";
+import { sendEmailOTP } from "@/lib/email";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!verifyOrigin(req)) {
+      return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
+    }
+
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("x-real-ip") ||
@@ -69,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch user
     const userResult = await pool.query(
-      `SELECT id, full_name, email, password_hash FROM users WHERE LOWER(email) = $1`,
+      `SELECT id, full_name, email, password_hash, is_2fa_enabled, two_factor_method FROM users WHERE LOWER(email) = $1`,
       [sanitizedEmail.toLowerCase()]
     );
 
@@ -119,6 +126,28 @@ export async function POST(req: NextRequest) {
           { status: 500 }
         )
       );
+    }
+
+    if (user.is_2fa_enabled) {
+      const tempToken = jwt.sign(
+        { email: user.email, type: "2fa_pending" },
+        secret,
+        { expiresIn: "10m" }
+      );
+      
+      // Only send OTP immediately if email is the ONLY method enabled
+      if (user.two_factor_method === "email") {
+        const otp = crypto.randomInt(100000, 999999).toString();
+        await redis.set(`email_2fa:${user.email}`, otp, { ex: 300 });
+        await sendEmailOTP(user.email, otp);
+      }
+      
+      return withSecurityHeaders(NextResponse.json({
+        message: "2FA Required",
+        requires2FA: true,
+        method: user.two_factor_method, // "totp", "email", or "both"
+        tempToken,
+      }));
     }
 
     // Generate JWT token

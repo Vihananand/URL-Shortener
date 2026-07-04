@@ -17,7 +17,7 @@ export async function GET() {
 
   try {
     const userResult = await pool.query(
-      "SELECT id, full_name, email FROM users WHERE email = $1",
+      "SELECT id, full_name, email, is_2fa_enabled, two_factor_method, is_virus_total_scan_enabled FROM users WHERE email = $1",
       [decode.email]
     );
 

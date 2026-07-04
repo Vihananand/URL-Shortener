@@ -21,7 +21,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     if (!url) {
       // Find URL by short code in Postgres
       const result = await pool.query(
-        `SELECT id, original_url, is_active, expires_at, max_clicks, clicks FROM urls WHERE short_code = $1`,
+        `SELECT id, original_url, is_active, expires_at, max_clicks, clicks, password_hash FROM urls WHERE short_code = $1`,
         [slug]
       );
 
@@ -49,15 +49,21 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       return NextResponse.redirect(new URL("/?error=max-clicks-reached", req.url));
     }
 
+    // If password protected, redirect to secure page instead of original URL
+    if (url.password_hash) {
+      return NextResponse.redirect(new URL(`/secure/${slug}`, req.url));
+    }
+
     // Get request headers for analytics
     const headersList = await headers();
-    const ipAddress =
+    const rawIp =
       headersList.get("x-forwarded-for") ||
       headersList.get("x-real-ip") ||
       headersList.get("cf-connecting-ip") ||
       "unknown";
-    const userAgent = headersList.get("user-agent") || "unknown";
-    const referrer = headersList.get("referer") || null;
+    const ipAddress = rawIp.split(",")[0].trim().substring(0, 45);
+    const userAgent = (headersList.get("user-agent") || "unknown").substring(0, 1000); // text column but good to limit
+    const referrer = (headersList.get("referer") || null)?.substring(0, 500) || null;
 
     // Record analytics in parallel with click increment
     await Promise.all([
@@ -76,7 +82,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     // Redirect to original URL
     return NextResponse.redirect(url.original_url);
   } catch (err) {
-    console.error(err);
-    return NextResponse.redirect(new URL("/?error=redirect-failed", req.url));
+    console.error("Redirect Error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.redirect(new URL(`/?error=redirect-failed&details=${encodeURIComponent(errorMessage)}`, req.url));
   }
 }
