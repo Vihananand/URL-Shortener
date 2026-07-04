@@ -21,9 +21,10 @@ A full-stack URL shortener web application with a marketing landing page and a c
 - **Hero shortener** — paste a URL on the landing page and instantly get a `slicely.in/<code>` short link with one-click copy
 - **Dashboard** — manage all your links with search, sort, toggle active/inactive, delete, and copy-to-clipboard
 - **Create Link Modal** — custom slug support, URL validation, and a live `slicely.in/<slug>` preview
+- **Advanced Security** — **Password-protect** specific shortened links, and enforce **Multi-Method 2FA** (Authenticator App & Email OTP) for your account
+- **Settings Dashboard** — manage global account configurations, toggle dual 2FA, and enable/disable global VirusTotal URL safety scanning
 - **Auth pages** — secure sign-in and sign-up with email/password and Google OAuth support
 - **Real-time analytics** — track clicks, active links, and engagement metrics
-- **Security** — integration with VirusTotal API for URL safety scanning
 - **Responsive Navbar** — scroll-aware frosted glass effect with a mobile hamburger menu
 - **Design system** — reusable `Button`, `Input`, `Modal`, `Badge`, and `CopyButton` primitives, all motion-animated
 
@@ -35,6 +36,8 @@ A full-stack URL shortener web application with a marketing landing page and a c
 | `/auth/signin` | Sign-in form |
 | `/auth/signup` | Sign-up form |
 | `/dashboard` | Link management dashboard |
+| `/dashboard/settings` | Security and account settings panel |
+| `/secure/[slug]` | Password prompt for secured links |
 | `*` | Animated 404 page |
 
 ## Getting Started
@@ -55,6 +58,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 UPSTASH_REDIS_REST_URL=your_upstash_redis_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 VIRUSTOTAL_API_KEY=your_virustotal_api_key
+RESEND_API_KEY=your_resend_api_key
 ```
 
 3. Start the development server:
@@ -81,10 +85,12 @@ The application includes several core API routes to handle authentication, URLs,
 | Endpoint | Description |
 | --- | --- |
 | `/api/urls` | Create and fetch short URLs |
+| `/api/secure/[slug]` | Verify link passwords and log analytics |
 | `/api/signin` | Authenticate user via email/password |
 | `/api/signup` | Register new user via email/password |
 | `/api/auth/google` | Authenticate user via Google OAuth |
 | `/api/auth/me` | Fetch current authenticated user |
+| `/api/2fa/*` | Setup, enable, disable, and verify TOTP & Email 2FA |
 | `/api/dashboard` | Dashboard link statistics and data |
 | `/api/public-stats` | Public platform statistics (e.g. total links, clicks) |
 | `/api/account` | Manage user account settings |
