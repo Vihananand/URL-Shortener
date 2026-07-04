@@ -101,7 +101,7 @@ export default function SecurePage({ params }: { params: Promise<{ slug: string 
 
         <div className="mt-8 text-center">
           <p className="text-xs text-muted/60">
-            Powered by Antigravity URL Shortener
+            Powered by Slicly
           </p>
         </div>
       </motion.div>
