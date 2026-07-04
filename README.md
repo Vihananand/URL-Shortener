@@ -22,6 +22,7 @@ A full-stack URL shortener web application with a marketing landing page and a c
 - **Dashboard** — manage all your links with search, sort, toggle active/inactive, delete, and copy-to-clipboard
 - **Create Link Modal** — custom slug support, URL validation, and a live `slicely.in/<slug>` preview
 - **Advanced Security** — **Password-protect** specific shortened links, and enforce **Multi-Method 2FA** (Authenticator App & Email OTP) for your account
+- **Global Rate Limiting** — Redis-backed rate limiting protects against brute-force attacks via Anonymous IP blocking, while throttling authenticated users across endpoints
 - **Settings Dashboard** — manage global account configurations, toggle dual 2FA, and enable/disable global VirusTotal URL safety scanning
 - **Auth pages** — secure sign-in and sign-up with email/password and Google OAuth support
 - **Real-time analytics** — track clicks, active links, and engagement metrics
