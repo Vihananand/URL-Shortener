@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       "unknown";
 
     // Check rate limit by IP
-    const ipLimitCheck = loginLimiter.checkLimit(`login-${ip}`);
+    const ipLimitCheck = await loginLimiter.checkLimit(`login-${ip}`);
     if (!ipLimitCheck.allowed) {
       const res = NextResponse.json(
         { message: "Too many login attempts. Please try again later." },

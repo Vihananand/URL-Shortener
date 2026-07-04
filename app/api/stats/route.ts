@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Rate limit
-    const limitCheck = statLimiter.checkLimit(`stats-${decoded.email}`);
+    // Rate limit check
+    const limitCheck = await statLimiter.checkLimit(`stats-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
         NextResponse.json(

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       "unknown";
 
     // Check rate limit by IP
-    const ipLimitCheck = googleAuthLimiter.checkLimit(`google-auth-${ip}`);
+    const ipLimitCheck = await googleAuthLimiter.checkLimit(`google-auth-${ip}`);
     if (!ipLimitCheck.allowed) {
       const res = NextResponse.json(
         { message: "Too many login attempts. Please try again later." },

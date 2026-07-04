@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       "unknown";
 
     // Check rate limit
-    const limitCheck = signupLimiter.checkLimit(`signup-${ip}`);
+    const limitCheck = await signupLimiter.checkLimit(`signup-${ip}`);
     if (!limitCheck.allowed) {
       const res = NextResponse.json(
         { message: "Too many signup attempts. Please try again later." },

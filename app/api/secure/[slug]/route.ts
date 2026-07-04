@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const ipAddress = rawIp.split(",")[0].trim().substring(0, 45);
       
     // Rate limit check
-    const rateLimitResult = passwordLimiter.checkLimit(ipAddress);
+    const rateLimitResult = await passwordLimiter.checkLimit(ipAddress);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { message: "Too many attempts, please try again later" },

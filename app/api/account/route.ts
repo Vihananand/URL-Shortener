@@ -41,8 +41,8 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Rate limit account deletion attempts
-    const limitCheck = deleteAccountLimiter.checkLimit(`delete-account-${decoded.email}`);
+    // Rate limit check
+    const limitCheck = await deleteAccountLimiter.checkLimit(`delete-account-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
         NextResponse.json(

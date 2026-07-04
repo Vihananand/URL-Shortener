@@ -137,8 +137,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       ));
     }
 
-    // Rate limit by user email
-    const limitCheck = deleteUrlLimiter.checkLimit(`delete-url-${decoded.email}`);
+    // Rate limit check
+    const limitCheck = await deleteUrlLimiter.checkLimit(`delete-url-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(NextResponse.json({ message: "Rate limit exceeded" }, { status: 429 }));
     }

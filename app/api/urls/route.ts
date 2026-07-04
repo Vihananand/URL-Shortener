@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit by user email
-    const limitCheck = createUrlLimiter.checkLimit(`create-url-${decoded.email}`);
+    const limitCheck = await createUrlLimiter.checkLimit(`create-url-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -232,7 +232,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Rate limit by user email
-    const limitCheck = getUrlsLimiter.checkLimit(`get-urls-${decoded.email}`);
+    const limitCheck = await getUrlsLimiter.checkLimit(`get-urls-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
         NextResponse.json(
