@@ -36,7 +36,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     // Check if URL is active
     if (!url.is_active) {
-      return NextResponse.redirect(new URL("/?error=link-disabled", req.url));
+      return NextResponse.redirect(new URL("/disabled", req.url));
     }
 
     // Check expiration date
