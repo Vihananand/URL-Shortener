@@ -1,25 +1,21 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Link2, X, Menu, ArrowRight, ArrowLeft, LogOut } from "lucide-react";
 import { showToast } from "@/components/ui/Toast";
-
 const navLinks = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How It Works" },
   { href: "/#stats", label: "Stats" },
 ];
-
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
   const pathname = usePathname();
   const router = useRouter();
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -30,21 +26,17 @@ export default function Navbar() {
         console.error(err);
       }
     };
-
     checkAuth();
     const onScroll = () => setScrolled(window.scrollY > 16);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
   const isDashboard = pathname?.startsWith("/dashboard");
-
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/logout", {
         method: "POST",
       });
-
       if (res.ok) {
         showToast.success("Logged out successfully", {
           duration: 3000,
@@ -60,7 +52,6 @@ export default function Navbar() {
       });
     }
   };
-
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -73,7 +64,7 @@ export default function Navbar() {
       }`}
     >
       <nav className="max-w-6xl mx-auto px-5 sm:px-8 h-15 flex items-center justify-between">
-        {/* Logo */}
+        {}
         <Link href="/" className="flex items-center gap-2.5 group">
           <motion.div
             whileHover={{ rotate: 10, scale: 1.08 }}
@@ -86,8 +77,7 @@ export default function Navbar() {
             Slicly
           </span>
         </Link>
-
-        {/* Desktop links */}
+        {}
         {!isDashboard && (
           <div className="hidden md:flex items-center gap-0.5 text-sm">
             {navLinks.map((link) => (
@@ -101,10 +91,8 @@ export default function Navbar() {
             ))}
           </div>
         )}
-
-        {/* Removed Dashboard link from center when already on Dashboard page */}
-
-        {/* CTA */}
+        {}
+        {}
         <div className="flex items-center gap-2">
           {!isDashboard ? (
             <>
@@ -151,7 +139,6 @@ export default function Navbar() {
               </Link>
             </motion.div>
           )}
-
           {!isDashboard && (
             <button
               type="button"
@@ -185,8 +172,7 @@ export default function Navbar() {
           )}
         </div>
       </nav>
-
-      {/* Mobile drawer */}
+      {}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div

@@ -1,13 +1,10 @@
 "use client";
-
 import { motion } from "motion/react";
 import type { DashboardStats } from "@/types";
 import { formatNumber } from "@/lib/utils";
 import { APP_DOMAIN } from "@/lib/site";
 import { Link2, MousePointerClick, CheckCircle2, Star } from "lucide-react";
-
 interface StatsCardsProps { stats: DashboardStats; }
-
 export default function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
@@ -35,7 +32,6 @@ export default function StatsCards({ stats }: StatsCardsProps) {
       Icon: Star,
     },
   ];
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
       {cards.map((card, i) => {
@@ -49,9 +45,8 @@ export default function StatsCards({ stats }: StatsCardsProps) {
             whileHover={{ y: -2, transition: { duration: 0.18 } }}
             className="group gradient-border-card p-5 shadow-card cursor-default hover:bg-card2 transition-colors duration-300"
           >
-            {/* Top shimmer */}
+            {}
             <div className="absolute top-0 left-[15%] right-[15%] h-px shimmer-line opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] uppercase tracking-widest text-white/30 font-medium">{card.label}</span>
               <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center text-white/30 group-hover:text-white/55 group-hover:bg-white/8 transition-all">

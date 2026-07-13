@@ -3,45 +3,36 @@ import { QRCodeCanvas } from "qrcode.react";
 import { Download, X } from "lucide-react";
 import { useRef } from "react";
 import { showToast } from "./Toast";
-
 interface QRCodeModalProps {
   isOpen: boolean;
   onClose: () => void;
   url: string;
 }
-
 export default function QRCodeModal({ isOpen, onClose, url }: QRCodeModalProps) {
   const qrRef = useRef<HTMLDivElement>(null);
-
   const handleDownload = () => {
     try {
       const canvas = qrRef.current?.querySelector("canvas");
       if (!canvas) return;
-      
       const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
       const downloadLink = document.createElement("a");
       downloadLink.href = pngUrl;
-      
       let filename = "qrcode.png";
       try {
         const path = new URL(url).pathname.slice(1);
         if (path) filename = `qrcode-${path}.png`;
       } catch (e) {
-        // Fallback if URL is invalid
       }
-      
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-
       showToast.success("QR Code downloaded!");
     } catch (err) {
       console.error(err);
       showToast.error("Failed to download QR code");
     }
   };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -66,10 +57,8 @@ export default function QRCodeModal({ isOpen, onClose, url }: QRCodeModalProps) 
               >
                 <X size={18} />
               </button>
-
               <h3 className="text-lg font-semibold text-text mb-1">QR Code</h3>
               <p className="text-sm text-muted mb-6">Scan to open the short link.</p>
-
               <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 shadow-inner" ref={qrRef}>
                 <QRCodeCanvas 
                   value={url} 
@@ -80,7 +69,6 @@ export default function QRCodeModal({ isOpen, onClose, url }: QRCodeModalProps) 
                   includeMargin={false} 
                 />
               </div>
-
               <button
                 onClick={handleDownload}
                 className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-2.5 rounded-xl font-medium transition-colors cursor-pointer"

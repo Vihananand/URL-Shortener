@@ -1,9 +1,7 @@
 "use client";
-
 import { motion, AnimatePresence } from "motion/react";
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
-
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,19 +9,16 @@ interface ModalProps {
   children: React.ReactNode;
   maxWidth?: string;
 }
-
 export default function Modal({ isOpen, onClose, title, children, maxWidth = "max-w-lg" }: ModalProps) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
-
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     if (isOpen) window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, [isOpen, onClose]);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -41,9 +36,8 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = "ma
             transition={{ duration: 0.26, ease: "easeOut" }}
             className={`relative w-full ${maxWidth} gradient-border-card shadow-card z-10`}
           >
-            {/* Top shine */}
+            {}
             <div className="absolute top-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-
             {title && (
               <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                 <h2 className="text-sm font-semibold text-white/80 tracking-tight">{title}</h2>

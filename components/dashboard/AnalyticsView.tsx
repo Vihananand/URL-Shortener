@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
@@ -19,7 +18,6 @@ import {
 } from "recharts";
 import { Calendar, TrendingUp, Users, Globe } from "lucide-react";
 import { APP_DOMAIN } from "@/lib/site";
-
 interface AnalyticsData {
   shortCode: string;
   summary: {
@@ -50,26 +48,21 @@ interface AnalyticsData {
     deviceType: string;
   }>;
 }
-
 interface AnalyticsViewProps {
   urlId: string;
   onClose: () => void;
 }
-
 export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         const res = await fetch(`/api/urls/${urlId}/analytics`);
-
         if (!res.ok) {
           throw new Error("Failed to fetch analytics");
         }
-
         const data = await res.json();
         setAnalytics(data);
       } catch (err) {
@@ -79,10 +72,8 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
         setLoading(false);
       }
     };
-
     fetchAnalytics();
   }, [urlId]);
-
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -99,7 +90,6 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
       </div>
     );
   }
-
   if (error || !analytics) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -119,13 +109,11 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
       </div>
     );
   }
-
   const DEVICE_COLORS = {
     Desktop: "#6366F1",
     Mobile: "#EC4899",
     Tablet: "#F59E0B",
   };
-
   const REFERRER_COLORS = [
     "#6366F1",
     "#EC4899",
@@ -133,7 +121,6 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
     "#10B981",
     "#06B6D4",
   ];
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -142,7 +129,6 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
       minute: "2-digit",
     });
   };
-
   const statCards = [
     {
       icon: <TrendingUp size={20} className="text-primary" />,
@@ -169,7 +155,6 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
       bg: "bg-cyan-500/10",
     },
   ];
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div
@@ -177,7 +162,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-auto shadow-2xl"
       >
-        {/* Header */}
+        {}
         <div className="sticky top-0 bg-card border-b border-border p-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Analytics</h2>
@@ -190,10 +175,9 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
             ✕
           </button>
         </div>
-
-        {/* Content */}
+        {}
         <div className="p-6 space-y-8">
-          {/* Summary Stats */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -216,10 +200,9 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
               </motion.div>
             ))}
           </motion.div>
-
-          {/* Charts Grid */}
+          {}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Hourly Clicks Chart */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -254,8 +237,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
                 </LineChart>
               </ResponsiveContainer>
             </motion.div>
-
-            {/* Device Breakdown */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -294,8 +276,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
               </ResponsiveContainer>
             </motion.div>
           </div>
-
-          {/* Top Referrers */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -331,8 +312,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
               <p className="text-center text-white/40 py-8">No referrer data available</p>
             )}
           </motion.div>
-
-          {/* Recent Clicks Table */}
+          {}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -382,8 +362,7 @@ export default function AnalyticsView({ urlId, onClose }: AnalyticsViewProps) {
               </tbody>
             </table>
           </motion.div>
-
-          {/* Footer */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

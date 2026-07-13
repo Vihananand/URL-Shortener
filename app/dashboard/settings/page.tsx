@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { motion } from "motion/react";
@@ -8,22 +7,17 @@ import { showToast } from "@/components/ui/Toast";
 import { Shield, Key, Mail, Smartphone, ArrowLeft, Link2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
 export default function SettingsPage() {
   const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
   const [is2faEnabled, setIs2faEnabled] = useState(false);
   const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
   const [isVirusTotalScanEnabled, setIsVirusTotalScanEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
-  
-  // 2FA Setup state
   const [setupStep, setSetupStep] = useState<"none" | "choose" | "totp" | "email">("none");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [verifyCode, setVerifyCode] = useState("");
   const [verifying, setVerifying] = useState(false);
-  
   const [userSlug, setUserSlug] = useState("Dashboard");
-
   useEffect(() => {
     const fetchUserStatus = async () => {
       try {
@@ -31,9 +25,6 @@ export default function SettingsPage() {
         if (res.ok) {
           const data = await res.json();
           setUserSlug(data.user?.full_name?.split(" ")[0] || "Dashboard");
-          
-          // Actually, we need an endpoint to fetch 2FA status, or just include it in /api/auth/me
-          // I will update /api/auth/me to include 2fa status.
           setIs2faEnabled(data.user?.is_2fa_enabled || false);
           setTwoFactorMethod(data.user?.two_factor_method || null);
           setIsVirusTotalScanEnabled(data.user?.is_virus_total_scan_enabled !== false);
@@ -46,12 +37,9 @@ export default function SettingsPage() {
     };
     fetchUserStatus();
   }, []);
-
   const handleDeleteAccount = async () => {
     setDeleteAccountModalOpen(false);
-    // Handled in modal component which calls /api/account DELETE
   };
-
   const handleStartSetup = async (method: "totp" | "email") => {
     setSetupStep(method);
     try {
@@ -76,7 +64,6 @@ export default function SettingsPage() {
       setSetupStep("none");
     }
   };
-
   const handleVerifyEnable = async () => {
     if (!verifyCode) {
       showToast.error("Please enter the verification code");
@@ -105,7 +92,6 @@ export default function SettingsPage() {
       setVerifying(false);
     }
   };
-
   const handleDisable2FA = async (methodToDisable?: string) => {
     if (!confirm(`Are you sure you want to disable ${methodToDisable === 'totp' ? 'Authenticator App' : methodToDisable === 'email' ? 'Email OTP' : '2FA'}?`)) return;
     try {
@@ -129,7 +115,6 @@ export default function SettingsPage() {
       showToast.error("Failed to disable 2FA");
     }
   };
-
   const handleToggleVirusTotalScan = async () => {
     const newValue = !isVirusTotalScanEnabled;
     setIsVirusTotalScanEnabled(newValue);
@@ -150,12 +135,10 @@ export default function SettingsPage() {
       showToast.error("Failed to update security settings");
     }
   };
-
   return (
     <div className="min-h-screen bg-bg">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -173,14 +156,13 @@ export default function SettingsPage() {
             Manage your account security and authentication methods.
           </p>
         </motion.div>
-
         {loading ? (
           <div className="flex justify-center p-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="space-y-8">
-            {/* 2FA Section */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -196,7 +178,6 @@ export default function SettingsPage() {
                   <p className="text-muted text-sm mb-6">
                     Add an extra layer of security to your account. When enabled, you'll need to provide a verification code along with your password when signing in.
                   </p>
-
                   {is2faEnabled && (
                     <div className="space-y-3 mb-6">
                       <h3 className="text-text font-medium text-sm">Active Methods</h3>
@@ -214,7 +195,6 @@ export default function SettingsPage() {
                           </button>
                         </div>
                       )}
-                      
                       {(twoFactorMethod === "email" || twoFactorMethod === "both") && (
                         <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -231,7 +211,6 @@ export default function SettingsPage() {
                       )}
                     </div>
                   )}
-
                   {(!is2faEnabled || twoFactorMethod !== "both") && (
                     <div className="border-t border-border pt-6 mt-2">
                       {setupStep === "none" ? (
@@ -278,7 +257,6 @@ export default function SettingsPage() {
                       ) : (
                         <div className="space-y-4 bg-black/20 p-6 rounded-xl border border-white/5">
                           <h3 className="text-text font-medium">Verify your {setupStep === "totp" ? "Authenticator App" : "Email"}</h3>
-                          
                           {setupStep === "totp" && qrCodeUrl && (
                             <div className="mb-4">
                               <p className="text-sm text-muted mb-3">Scan this QR code with your authenticator app:</p>
@@ -287,11 +265,9 @@ export default function SettingsPage() {
                               </div>
                             </div>
                           )}
-
                           {setupStep === "email" && (
                             <p className="text-sm text-muted mb-4">We've sent a 6-digit verification code to your email address.</p>
                           )}
-
                           <div className="flex gap-3 max-w-sm">
                             <input
                               type="text"
@@ -316,8 +292,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </motion.div>
-
-            {/* Link Security Section */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -333,7 +308,6 @@ export default function SettingsPage() {
                   <p className="text-muted text-sm mb-6">
                     Automatically scan destination URLs before redirecting users. This protects your visitors from malicious links.
                   </p>
-
                   <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${isVirusTotalScanEnabled ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`}></div>
@@ -356,8 +330,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </motion.div>
-
-            {/* Danger Zone */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -368,7 +341,6 @@ export default function SettingsPage() {
               <p className="text-muted text-sm mb-6">
                 Once you delete your account, there is no going back. Please be certain.
               </p>
-              
               <button
                 onClick={() => setDeleteAccountModalOpen(true)}
                 className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
@@ -376,12 +348,9 @@ export default function SettingsPage() {
                 Delete Account
               </button>
             </motion.div>
-
           </div>
         )}
-
       </div>
-
       <DeleteAccountModal
         isOpen={deleteAccountModalOpen}
         onClose={() => setDeleteAccountModalOpen(false)}

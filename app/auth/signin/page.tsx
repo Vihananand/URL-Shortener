@@ -1,5 +1,4 @@
 "use client";
-
 import "@/app/auth/auth.css";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,22 +9,18 @@ import { useRouter } from "next/navigation";
 import { showToast } from "@/components/ui/Toast";
 import { Link2, Mail, Lock, Smartphone } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // 2FA states
   const [requires2FA, setRequires2FA] = useState(false);
   const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [otp, setOtp] = useState("");
   const [verifying, setVerifying] = useState(false);
-
   const validate = () => {
     const e: typeof errors = {};
     if (!email) e.email = "Email is required.";
@@ -34,7 +29,6 @@ export default function SignInPage() {
     if (!password) e.password = "Password is required.";
     return e;
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errs = validate();
@@ -42,10 +36,8 @@ export default function SignInPage() {
       setErrors(errs);
       return;
     }
-
     setLoading(true);
     setErrors({});
-
     const res = await fetch("/api/signin", {
       method: "POST",
       headers: {
@@ -53,9 +45,7 @@ export default function SignInPage() {
       },
       body: JSON.stringify({ email, password }),
     });
-
     const data = await res.json();
-
     if (!res.ok) {
       setErrors({ general: data.message });
       setLoading(false);
@@ -69,7 +59,6 @@ export default function SignInPage() {
       });
       return;
     }
-
     if (data.requires2FA) {
       setRequires2FA(true);
       setTwoFactorMethod(data.method);
@@ -77,7 +66,6 @@ export default function SignInPage() {
       setLoading(false);
       return;
     }
-
     router.push(`/dashboard/${data.user.full_name}`);
     showToast.success(`${data.message}`, {
       duration: 4000,
@@ -87,29 +75,23 @@ export default function SignInPage() {
       icon: "✅",
       sound: true,
     });
-
     setLoading(false);
   };
-
   const handleVerify2FA = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!otp || otp.length < 6) {
       setErrors({ otp: "Enter a valid code" });
       return;
     }
-    
     setVerifying(true);
     setErrors({});
-    
     try {
       const res = await fetch("/api/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tempToken, code: otp, method: selectedMethod || twoFactorMethod }),
       });
-      
       const data = await res.json();
-      
       if (res.ok) {
         showToast.success("Verification successful");
         router.push(`/dashboard/${data.user.full_name}`);
@@ -123,7 +105,6 @@ export default function SignInPage() {
       setVerifying(false);
     }
   };
-
   const handleGoogleSuccess = async (credentialResponse: any) => {
     setLoading(true);
     setErrors({});
@@ -134,7 +115,6 @@ export default function SignInPage() {
         body: JSON.stringify({ credential: credentialResponse.credential }),
       });
       const data = await res.json();
-      
       if (!res.ok) {
         showToast.error(data.message || "Google authentication failed");
         setLoading(false);
@@ -147,7 +127,6 @@ export default function SignInPage() {
         setLoading(false);
         return;
       }
-      
       router.push(`/dashboard/${data.user.full_name}`);
       showToast.success("Successfully authenticated with Google");
     } catch (err) {
@@ -155,15 +134,13 @@ export default function SignInPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* Background */}
+      {}
       <div className="absolute inset-0 dot-bg pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none auth-gradient-bg" />
-
       <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,7 +162,6 @@ export default function SignInPage() {
             Sign in to your Slicly account
           </p>
         </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -319,7 +295,6 @@ export default function SignInPage() {
               autoComplete="email"
               autoFocus
             />
-
             <div>
               <Input
                 label="Password"
@@ -342,7 +317,6 @@ export default function SignInPage() {
                 </Link>
               </div>
             </div>
-
             <Button
               variant="primary"
               type="submit"
@@ -353,13 +327,11 @@ export default function SignInPage() {
               {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
-
           <div className="mt-6 mb-4 flex items-center justify-center gap-3">
             <div className="h-px bg-white/10 flex-1" />
             <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Or continue with</span>
             <div className="h-px bg-white/10 flex-1" />
           </div>
-
           <div className="flex justify-center mt-4">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
@@ -369,7 +341,6 @@ export default function SignInPage() {
               text="signin_with"
             />
           </div>
-
           <div className="mt-5 pt-5 border-t border-border text-center">
             <p className="text-sm text-white/40">
               Don&apos;t have an account?{" "}
@@ -384,7 +355,6 @@ export default function SignInPage() {
           </>
           )}
         </motion.div>
-
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

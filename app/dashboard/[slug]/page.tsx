@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import type { ShortenedUrl } from "@/types";
 import { useParams, useRouter } from "next/navigation";
@@ -10,14 +9,12 @@ import StatsCards from "@/components/dashboard/StatsCards";
 import CreateUrlModal from "@/components/dashboard/CreateUrlModal";
 import { showToast } from "@/components/ui/Toast";
 import { LogOut } from "lucide-react";
-
 export default function DashboardPage() {
   const [urls, setUrls] = useState<ShortenedUrl[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const params = useParams();
   const router = useRouter();
-
   const stats = {
     totalUrls: urls.length,
     totalClicks: urls.reduce((sum, u) => sum + u.clicks, 0),
@@ -26,7 +23,6 @@ export default function DashboardPage() {
       ? [...urls].sort((a, b) => b.clicks - a.clicks)[0]
       : null,
   };
-
   useEffect(() => {
     const fetchUrls = async () => {
       try {
@@ -34,7 +30,6 @@ export default function DashboardPage() {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-
         if (!res.ok) {
           if (res.status === 401) {
             router.push("/auth/signin");
@@ -42,7 +37,6 @@ export default function DashboardPage() {
           }
           throw new Error("Failed to fetch URLs");
         }
-
         const data = await res.json();
         setUrls(data.urls || []);
       } catch (err) {
@@ -55,10 +49,8 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
-
     fetchUrls();
   }, [router]);
-
   const handleCreated = (newUrl: ShortenedUrl) => {
     setUrls((prev) => [newUrl, ...prev]);
     showToast.success("Link created successfully", {
@@ -66,7 +58,6 @@ export default function DashboardPage() {
       position: "top-center",
     });
   };
-
   const handleDelete = (id: string) => {
     setUrls((prev) => prev.filter((u) => u.id !== id));
     showToast.success("Link deleted", {
@@ -74,20 +65,16 @@ export default function DashboardPage() {
       position: "top-center",
     });
   };
-
   const handleToggleActive = (id: string) => {
     setUrls((prev) =>
       prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u)),
     );
   };
-
-
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/logout", {
         method: "POST",
       });
-
       if (res.ok) {
         showToast.success("Logged out successfully");
         setTimeout(() => {
@@ -99,12 +86,11 @@ export default function DashboardPage() {
       showToast.error("Failed to logout");
     }
   };
-
   return (
     <div className="min-h-screen bg-bg">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-        {/* Header */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -141,8 +127,7 @@ export default function DashboardPage() {
             </motion.button>
           </div>
         </motion.div>
-
-        {/* Stats */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -151,8 +136,7 @@ export default function DashboardPage() {
         >
           <StatsCards stats={stats} />
         </motion.div>
-
-        {/* Links Section */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -162,7 +146,6 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-text">Your Links</h2>
             <span className="text-sm text-muted">{urls.length} total</span>
           </div>
-
           <AnimatePresence mode="wait">
             {urls.length === 0 ? (
               <motion.div
@@ -214,15 +197,12 @@ export default function DashboardPage() {
           </AnimatePresence>
         </motion.div>
       </div>
-
       <CreateUrlModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreated={handleCreated}
       />
-
-
-      {/* Bottom Actions */}
+      {}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-8">
         <div className="flex flex-col sm:flex-row gap-3 border-t border-white/5 pt-8 mt-12">
           <motion.button

@@ -1,19 +1,14 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle2, XCircle } from "lucide-react";
-
 type ToastType = "success" | "error";
-
 interface Toast {
   id: string;
   message: string;
   type: ToastType;
 }
-
 let toastListener: ((toast: Toast) => void) | null = null;
-
 export const showToast = {
   success: (message: string, options?: any) => {
     if (toastListener) {
@@ -26,10 +21,8 @@ export const showToast = {
     }
   }
 };
-
 export const ToastProvider = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
   useEffect(() => {
     toastListener = (toast) => {
       setToasts((prev) => [...prev, toast]);
@@ -41,7 +34,6 @@ export const ToastProvider = () => {
       toastListener = null;
     };
   }, []);
-
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-2 pointer-events-none">
       <AnimatePresence>
@@ -84,7 +76,6 @@ export const ToastProvider = () => {
                 <XCircle className="w-5 h-5 text-red-500" />
               )}
             </motion.div>
-
             <motion.div
               initial={{ clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}

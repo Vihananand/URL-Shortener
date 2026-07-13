@@ -1,13 +1,11 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Trash2 } from "lucide-react";
-
 interface DeleteLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   isDeleting: boolean;
 }
-
 export default function DeleteLinkModal({
   isOpen,
   onClose,
@@ -18,7 +16,7 @@ export default function DeleteLinkModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -26,8 +24,7 @@ export default function DeleteLinkModal({
             onClick={!isDeleting ? onClose : undefined}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
-
-          {/* Modal */}
+          {}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -40,12 +37,10 @@ export default function DeleteLinkModal({
                 <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-4 border border-red-500/20 mx-auto shadow-inner">
                   <Trash2 className="text-red-500" size={20} strokeWidth={2} />
                 </div>
-                
                 <h3 className="text-xl font-bold text-text text-center mb-2">Delete Link?</h3>
                 <p className="text-sm text-muted text-center mb-6">
                   Are you sure you want to delete this shortened link? This action cannot be undone and the link will stop working immediately.
                 </p>
-
                 <div className="flex gap-3">
                   <motion.button
                     whileHover={{ scale: 1.02 }}

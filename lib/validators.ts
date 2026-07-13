@@ -1,10 +1,7 @@
-// Input validation and sanitization
-
 export interface ValidationResult {
   valid: boolean;
   error?: string;
 }
-
 export const validators = {
   email: (email: string): ValidationResult => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,7 +13,6 @@ export const validators = {
     }
     return { valid: true };
   },
-
   password: (password: string): ValidationResult => {
     if (!password || password.length < 8) {
       return { valid: false, error: "Password must be at least 8 characters" };
@@ -24,7 +20,6 @@ export const validators = {
     if (password.length > 128) {
       return { valid: false, error: "Password too long" };
     }
-    // Check for at least one uppercase, one lowercase, one number
     if (!/[A-Z]/.test(password)) {
       return { valid: false, error: "Password must contain uppercase letter" };
     }
@@ -36,21 +31,14 @@ export const validators = {
     }
     return { valid: true };
   },
-
   url: (url: string): ValidationResult => {
     try {
-      // Check if it already has a protocol, otherwise try to parse by assuming https
       const hasProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
       const urlToParse = hasProtocol ? url : `https://${url}`;
-      
       const urlObj = new URL(urlToParse);
-      
-      // Strictly enforce http or https
       if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
         return { valid: false, error: "Only http and https protocols are allowed" };
       }
-
-      // Block localhost and private IPs
       if (
         urlObj.hostname === "localhost" ||
         urlObj.hostname === "127.0.0.1" ||
@@ -68,7 +56,6 @@ export const validators = {
       return { valid: false, error: "Invalid URL format" };
     }
   },
-
   slug: (slug: string): ValidationResult => {
     if (!slug || slug.length < 2 || slug.length > 50) {
       return { valid: false, error: "Slug must be between 2 and 50 characters" };
@@ -76,37 +63,31 @@ export const validators = {
     if (!/^[a-zA-Z0-9_-]+$/.test(slug)) {
       return { valid: false, error: "Slug can only contain letters, numbers, hyphens, and underscores" };
     }
-    // Avoid common route conflicts
     const reserved = ["api", "auth", "admin", "dashboard", "account", "settings"];
     if (reserved.includes(slug.toLowerCase())) {
       return { valid: false, error: "This slug is reserved" };
     }
     return { valid: true };
   },
-
   name: (name: string): ValidationResult => {
     if (!name || name.trim().length < 2 || name.length > 100) {
       return { valid: false, error: "Name must be between 2 and 100 characters" };
     }
-    // Remove suspicious characters
     if (/[<>{}[\]`]/.test(name)) {
       return { valid: false, error: "Name contains invalid characters" };
     }
     return { valid: true };
   },
 };
-
 export function sanitizeInput(input: string): string {
   return input
     .trim()
-    .replace(/[<>]/g, "") // Remove angle brackets
-    .slice(0, 500); // Limit length
+    .replace(/[<>]/g, "") 
+    .slice(0, 500); 
 }
-
 export function sanitizeEmail(email: string): string {
   return email.toLowerCase().trim();
 }
-
 export function escapeHtml(text: string): string {
   const map: { [key: string]: string } = {
     "&": "&amp;",

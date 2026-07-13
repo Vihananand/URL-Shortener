@@ -1,18 +1,14 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import React from "react";
-
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   icon?: React.ReactNode;
   rightElement?: React.ReactNode;
 }
-
 export default function Input({ label, error, icon, rightElement, className, id, ...props }: InputProps) {
   const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
-
   return (
     <div className="w-full">
       {label && (

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { ShortenedUrl } from "@/types";
@@ -11,13 +10,11 @@ import { MousePointerClick, Clock, ExternalLink, ToggleRight, ToggleLeft, Trash2
 import AnalyticsView from "@/components/dashboard/AnalyticsView";
 import QRCodeModal from "@/components/ui/QRCodeModal";
 import DeleteLinkModal from "@/components/dashboard/DeleteLinkModal";
-
 interface UrlTableProps {
   urls: ShortenedUrl[];
   onDelete: (id: string) => void;
   onToggleActive: (id: string) => void;
 }
-
 export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTableProps) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "clicks" | "alpha">("newest");
@@ -25,7 +22,6 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
   const [analyticsUrlId, setAnalyticsUrlId] = useState<string | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [linkToDelete, setLinkToDelete] = useState<string | null>(null);
-
   const filtered = urls
     .filter((u) =>
       u.originalUrl.toLowerCase().includes(search.toLowerCase()) ||
@@ -36,7 +32,6 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
       if (sortBy === "alpha") return a.shortCode.localeCompare(b.shortCode);
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
@@ -44,13 +39,11 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
-
       if (!res.ok) {
         console.error("Failed to delete URL");
         setDeletingId(null);
         return;
       }
-
       setTimeout(() => { 
         onDelete(id); 
         setDeletingId(null); 
@@ -62,7 +55,6 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
       setLinkToDelete(null);
     }
   };
-
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
       const res = await fetch(`/api/urls/${id}`, {
@@ -70,21 +62,18 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !currentStatus }),
       });
-
       if (!res.ok) {
         console.error("Failed to update URL");
         return;
       }
-
       onToggleActive(id);
     } catch (err) {
       console.error("Error toggling URL:", err);
     }
   };
-
   return (
     <div>
-      {/* Toolbar */}
+      {}
       <div className="flex flex-col sm:flex-row gap-2.5 mb-5">
         <div className="relative flex-1">
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -108,8 +97,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
           <option value="alpha">A–Z</option>
         </select>
       </div>
-
-      {/* Empty state */}
+      {}
       {filtered.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
           <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/4 border border-border flex items-center justify-center">
@@ -132,9 +120,8 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                 whileHover={{ y: -2, transition: { duration: 0.18 } }}
                 className="group gradient-border-card shadow-card hover:bg-card2 transition-colors duration-300 overflow-hidden"
               >
-                {/* Hover shimmer */}
+                {}
                 <div className="absolute top-0 left-0 right-0 h-px shimmer-line opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
                 <div className="p-4 pb-3">
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="min-w-0 flex-1">
@@ -150,7 +137,6 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                       {url.isActive ? "Active" : "Off"}
                     </Badge>
                   </div>
-
                   <div className="flex items-center gap-4 text-[11px] text-white/25">
                     <span className="flex items-center gap-1.5">
                       <MousePointerClick size={10} />
@@ -162,9 +148,7 @@ export default function UrlTable({ urls, onDelete, onToggleActive }: UrlTablePro
                     </span>
                   </div>
                 </div>
-
                 <div className="h-px bg-border mx-4" />
-
                 <div className="flex items-center justify-between px-4 py-2.5">
                   <a href={url.shortUrl} target="_blank" rel="noopener noreferrer"
                     className="text-[11px] text-white/30 hover:text-white/65 flex items-center gap-1.5 transition-colors">

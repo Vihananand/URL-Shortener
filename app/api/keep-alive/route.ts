@@ -2,13 +2,9 @@ import pool from "@/lib/db";
 import { NextResponse } from "next/server";
 import { createKeepAlive } from "@/lib/keepAlive";
 import { withSecurityHeaders } from "@/lib/security";
-
-// Initialize keep-alive tracker
 const dbKeepAlive = createKeepAlive({ key: "database" });
-
 export async function GET() {
   try {
-    // Check if we should ping
     if (!dbKeepAlive.shouldPing()) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -17,14 +13,10 @@ export async function GET() {
         )
       );
     }
-
-    // Simple ping query - very fast and lightweight
     const result = await pool.query("SELECT 1 as pong");
-
     if (result.rows.length > 0) {
       dbKeepAlive.recordPing();
       const status = dbKeepAlive.getStatus();
-
       return withSecurityHeaders(
         NextResponse.json(
           {
@@ -37,12 +29,10 @@ export async function GET() {
         )
       );
     }
-
     throw new Error("Unexpected response from database");
   } catch (err) {
     dbKeepAlive.recordError();
     console.error("Keep-alive error:", err);
-
     return withSecurityHeaders(
       NextResponse.json(
         { status: "error", message: "Keep-alive check failed" },

@@ -1,18 +1,15 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link2, ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
 import { generateShortCode } from "@/lib/utils";
 import { APP_URL } from "@/lib/site";
-
 export default function Hero() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
-
   const handleShorten = async () => {
     if (!url.trim()) { setError("Please enter a URL."); return; }
     try { new URL(url.startsWith("http") ? url : `https://${url}`); }
@@ -23,39 +20,31 @@ export default function Hero() {
     setResult(`${APP_URL}/${generateShortCode()}`);
     setLoading(false);
   };
-
   const handleCopy = async () => {
     if (!result) return;
     await navigator.clipboard.writeText(result);
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
   };
-
   const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.09 } } };
   const up = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } } };
-
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-5 sm:px-8 pt-24 pb-20 overflow-hidden">
-
-      {/* Dot grid background */}
+      {}
       <div className="absolute inset-0 dot-bg pointer-events-none" />
-
-      {/* Radial fade overlay */}
+      {}
       <div className="absolute inset-0 pointer-events-none gradient-overlay-top" />
       <div className="absolute inset-0 pointer-events-none gradient-overlay-bottom" />
-
-      {/* Subtle blob accents */}
+      {}
       <div className="blob animate-blob absolute top-1/4 left-1/4 w-125 h-125 bg-white/2.5 pointer-events-none" />
       <div className="blob animate-blob animation-delay-2000 absolute bottom-1/3 right-1/4 w-100 h-100 bg-white/[0.018] pointer-events-none" />
-
       <motion.div
         variants={stagger}
         initial="hidden"
         animate="visible"
         className="relative z-10 max-w-2xl mx-auto text-center"
       >
-
-        {/* Headline */}
+        {}
         <motion.h1
           variants={up}
           className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.03em] leading-[1.06] mb-5"
@@ -64,13 +53,11 @@ export default function Hero() {
           <br />
           <span className="text-white/30">Amplify reach.</span>
         </motion.h1>
-
-        {/* Subtitle */}
+        {}
         <motion.p variants={up} className="text-base text-white/40 max-w-md mx-auto mb-10 leading-relaxed">
           Create clean short links, track every click, and share with confidence — all from one beautiful dashboard.
         </motion.p>
-
-        {/* Input */}
+        {}
         <motion.div variants={up} className="w-full max-w-xl mx-auto">
           <div className="gradient-border-card p-1.5 flex flex-col sm:flex-row gap-3 sm:gap-2 shadow-card">
             <div className="flex-1 flex items-center gap-3 px-4">
@@ -99,7 +86,6 @@ export default function Hero() {
               )}
             </motion.button>
           </div>
-
           <AnimatePresence>
             {error && (
               <motion.p
@@ -114,8 +100,7 @@ export default function Hero() {
             )}
           </AnimatePresence>
         </motion.div>
-
-        {/* Result */}
+        {}
         <AnimatePresence>
           {result && (
             <motion.div
@@ -159,8 +144,7 @@ export default function Hero() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Trust badges */}
+        {}
         <motion.div variants={up} className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-white/25">
           <span className="flex items-center gap-2">
             <span className="w-1 h-1 rounded-full bg-white/25 inline-block" />

@@ -5,7 +5,6 @@ import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import StatsBar from "@/components/landing/StatsBar";
 import CTA from "@/components/landing/CTA";
-
 export default function LandingPage() {
   return (
     <>

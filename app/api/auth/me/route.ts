@@ -1,33 +1,1 @@
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import pool from "@/lib/db";
-
-export async function GET() {
-  const token = (await cookies()).get("token")?.value;
-
-  if (!token) {
-    return NextResponse.json({ user: null });
-  }
-
-  const decode = verifyToken(token) as any;
-  if (!decode || !decode.email) {
-    return NextResponse.json({ user: null });
-  }
-
-  try {
-    const userResult = await pool.query(
-      "SELECT id, full_name, email, is_2fa_enabled, two_factor_method, is_virus_total_scan_enabled FROM users WHERE email = $1",
-      [decode.email]
-    );
-
-    if (userResult.rows.length === 0) {
-      return NextResponse.json({ user: null });
-    }
-
-    return NextResponse.json({ user: userResult.rows[0] });
-  } catch (err) {
-    console.error("Error fetching user in auth/me:", err);
-    return NextResponse.json({ user: null });
-  }
-}
+import { cookies } from "next/headers";import { verifyToken } from "@/lib/auth";import { NextResponse } from "next/server";import pool from "@/lib/db";export async function GET() {  const token = (await cookies()).get("token")?.value;  if (!token) {    return NextResponse.json({ user: null });  }  const decode = verifyToken(token) as any;  if (!decode || !decode.email) {    return NextResponse.json({ user: null });  }  try {    const userResult = await pool.query(      "SELECT id, full_name, email, is_2fa_enabled, two_factor_method, is_virus_total_scan_enabled FROM users WHERE email = $1",      [decode.email]    );    if (userResult.rows.length === 0) {      return NextResponse.json({ user: null });    }    return NextResponse.json({ user: userResult.rows[0] });  } catch (err) {    console.error("Error fetching user in auth/me:", err);    return NextResponse.json({ user: null });  }}

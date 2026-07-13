@@ -1,9 +1,7 @@
 import type { ShortenedUrl, DashboardStats } from "@/types";
 import { generateShortCode } from "@/lib/utils";
 import { APP_URL } from "@/lib/site";
-
 export const BASE_URL = APP_URL;
-
 export const mockUrls: ShortenedUrl[] = [
   {
     id: "1",
@@ -60,7 +58,6 @@ export const mockUrls: ShortenedUrl[] = [
     isActive: true,
   },
 ];
-
 export function createMockUrl(originalUrl: string, customSlug?: string): ShortenedUrl {
   const shortCode = customSlug || generateShortCode();
   return {
@@ -73,7 +70,6 @@ export function createMockUrl(originalUrl: string, customSlug?: string): Shorten
     isActive: true,
   };
 }
-
 export function getMockStats(urls: ShortenedUrl[]): DashboardStats {
   return {
     totalUrls: urls.length,

@@ -9,28 +9,21 @@ import { validators } from "@/lib/validators";
 import { withSecurityHeaders, sanitizeErrorMessage, verifyOrigin } from "@/lib/security";
 import { APP_URL } from "@/lib/site";
 import bcrypt from "bcrypt";
-
-// Rate limiter: 30 URL creations per hour per user
 const createUrlLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   maxRequests: 30,
 });
-
-// Rate limiter: 100 URL reads per hour per user
 const getUrlsLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   maxRequests: 100,
 });
-
 export async function POST(req: NextRequest) {
   try {
     if (!verifyOrigin(req)) {
       return withSecurityHeaders(NextResponse.json({ message: "Forbidden - Invalid Origin" }, { status: 403 }));
     }
-
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
-
     if (!token) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -39,7 +32,6 @@ export async function POST(req: NextRequest) {
         )
       );
     }
-
     const decoded = verifyToken(token) as JwtPayload;
     if (!decoded || !decoded.email) {
       return withSecurityHeaders(
@@ -49,8 +41,6 @@ export async function POST(req: NextRequest) {
         )
       );
     }
-
-    // Rate limit by user email
     const limitCheck = await createUrlLimiter.checkLimit(`create-url-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
@@ -60,10 +50,7 @@ export async function POST(req: NextRequest) {
         )
       );
     }
-
     const { originalUrl, customSlug, deleteAfter24h, customExpiryDate, maxClicks, password } = await req.json();
-
-    // Input validation
     if (!originalUrl) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -72,33 +59,23 @@ export async function POST(req: NextRequest) {
         )
       );
     }
-
-    // Normalize URL
     const hasProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(originalUrl);
     const normalizedUrl = hasProtocol ? originalUrl : `https://${originalUrl}`;
-
-    // Get user from DB first to check their settings
     const userResult = await pool.query(
       "SELECT id, is_virus_total_scan_enabled FROM users WHERE email = $1",
       [decoded.email]
     );
-
     if (userResult.rows.length === 0) {
       return withSecurityHeaders(NextResponse.json({ message: "User not found" }, { status: 404 }));
     }
-
     const userId = userResult.rows[0].id;
     const isScanEnabled = userResult.rows[0].is_virus_total_scan_enabled !== false;
-
-    // VirusTotal Security Check
     if (isScanEnabled && process.env.VIRUSTOTAL_API_KEY) {
-      // Base64URL encode the URL per VT docs
-      const urlId = Buffer.from(normalizedUrl).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+      const urlId = Buffer.from(normalizedUrl).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\
       try {
         const vtRes = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
           headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
         });
-        
         if (vtRes.ok) {
           const vtData = await vtRes.json();
           const maliciousCount = vtData.data?.attributes?.last_analysis_stats?.malicious || 0;
@@ -112,8 +89,6 @@ export async function POST(req: NextRequest) {
         console.error("VT check failed", e);
       }
     }
-
-    // Validate URL
     const urlValidation = validators.url(normalizedUrl);
     if (!urlValidation.valid) {
       return withSecurityHeaders(
@@ -123,8 +98,6 @@ export async function POST(req: NextRequest) {
         )
       );
     }
-
-    // Validate custom slug if provided
     if (customSlug) {
       const slugValidation = validators.slug(customSlug);
       if (!slugValidation.valid) {
@@ -136,11 +109,7 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
-    // User ID is already fetched above as userId
     const shortCode = customSlug || generateShortCode();
-
-    // Check if custom slug already exists
     if (customSlug) {
       const existingUrl = await pool.query(
         "SELECT id FROM urls WHERE short_code = $1 AND user_id != $2",
@@ -155,30 +124,23 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
-    // Determine Expiry Date
     let finalExpiresAt: Date | null = null;
     if (deleteAfter24h) {
       finalExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     } else if (customExpiryDate) {
       finalExpiresAt = new Date(customExpiryDate);
     }
-
     let passwordHash = null;
     if (password && typeof password === "string" && password.trim().length > 0) {
       passwordHash = await bcrypt.hash(password.trim(), 10);
     }
-
-    // Insert new URL
     const result = await pool.query(
       `INSERT INTO urls (user_id, original_url, short_code, clicks, is_active, created_at, expires_at, max_clicks, password_hash)
        VALUES ($1, $2, $3, 0, true, CURRENT_TIMESTAMP, $4, $5, $6)
        RETURNING id, original_url, short_code, clicks, is_active, created_at`,
       [userId, normalizedUrl, shortCode, finalExpiresAt, maxClicks || null, passwordHash]
     );
-
     const url = result.rows[0];
-
     return withSecurityHeaders(
       NextResponse.json(
         {
@@ -206,12 +168,10 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
-
     if (!token) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -220,7 +180,6 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
     const decoded = verifyToken(token) as JwtPayload;
     if (!decoded || !decoded.email) {
       return withSecurityHeaders(
@@ -230,8 +189,6 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Rate limit by user email
     const limitCheck = await getUrlsLimiter.checkLimit(`get-urls-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
@@ -241,13 +198,10 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Get user ID
     const userResult = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [decoded.email]
     );
-
     if (userResult.rows.length === 0) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -256,10 +210,7 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
     const userId = userResult.rows[0].id;
-
-    // Get all URLs for user with limit
     const result = await pool.query(
       `SELECT id, original_url, short_code, clicks, is_active, created_at
        FROM urls
@@ -268,7 +219,6 @@ export async function GET(req: NextRequest) {
        LIMIT 1000`,
       [userId]
     );
-
     const urls = result.rows.map((url) => ({
       id: url.id,
       originalUrl: url.original_url,
@@ -278,7 +228,6 @@ export async function GET(req: NextRequest) {
       isActive: url.is_active,
       createdAt: url.created_at,
     }));
-
     return withSecurityHeaders(
       NextResponse.json(
         { urls },

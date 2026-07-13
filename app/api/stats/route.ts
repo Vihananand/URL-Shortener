@@ -5,18 +5,14 @@ import { NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { withSecurityHeaders, sanitizeErrorMessage } from "@/lib/security";
-
-// Rate limiter: 50 stats requests per hour per user
 const statLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   maxRequests: 50,
 });
-
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
-
     if (!token) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -25,7 +21,6 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
     const decoded = verifyToken(token) as JwtPayload;
     if (!decoded || !decoded.email) {
       return withSecurityHeaders(
@@ -35,8 +30,6 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Rate limit check
     const limitCheck = await statLimiter.checkLimit(`stats-${decoded.email}`);
     if (!limitCheck.allowed) {
       return withSecurityHeaders(
@@ -46,13 +39,10 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Get user ID
     const userResult = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [decoded.email]
     );
-
     if (userResult.rows.length === 0) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -61,13 +51,9 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
     const userId = userResult.rows[0].id;
-
-    // Get URL ID from query params
     const { searchParams } = new URL(req.url);
     const urlId = searchParams.get("urlId");
-
     if (!urlId) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -76,13 +62,10 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Verify URL belongs to user
     const urlResult = await pool.query(
       "SELECT id FROM urls WHERE id = $1 AND user_id = $2",
       [urlId, userId]
     );
-
     if (urlResult.rows.length === 0) {
       return withSecurityHeaders(
         NextResponse.json(
@@ -91,8 +74,6 @@ export async function GET(req: NextRequest) {
         )
       );
     }
-
-    // Get daily stats from materialized view
     const statsResult = await pool.query(
       `SELECT
         url_id,
@@ -106,13 +87,11 @@ export async function GET(req: NextRequest) {
        LIMIT 90`,
       [urlId]
     );
-
     const dailyStats = statsResult.rows.map((row: any) => ({
       date: new Date(row.date).toISOString().split("T")[0],
       clicks: row.clicks,
       uniqueVisitors: row.unique_visitors,
     }));
-
     return withSecurityHeaders(
       NextResponse.json(
         { dailyStats },

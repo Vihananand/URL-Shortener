@@ -1,21 +1,17 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { useInView, animate, motion } from "motion/react";
 import { Link2, MousePointerClick, Users, TrendingUp } from "lucide-react";
-
 interface PublicStats {
   totalUrls: number;
   totalClicks: number;
   totalUsers: number;
   activeUrls: number;
 }
-
 function CountUp({ to, suffix = "", decimals = 0 }: { to: number; suffix?: string; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const startedRef = useRef(false);
-
   useEffect(() => {
     if (isInView && !startedRef.current && ref.current) {
       startedRef.current = true;
@@ -29,10 +25,8 @@ function CountUp({ to, suffix = "", decimals = 0 }: { to: number; suffix?: strin
       return () => controls.stop();
     }
   }, [isInView, to, suffix, decimals]);
-
   return <span ref={ref}>{decimals > 0 ? (0).toFixed(decimals) : "0"}{suffix}</span>;
 }
-
 export default function StatsBar() {
   const [data, setData] = useState<PublicStats>({
     totalUrls: 0,
@@ -40,7 +34,6 @@ export default function StatsBar() {
     totalUsers: 0,
     activeUrls: 0,
   });
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -57,24 +50,20 @@ export default function StatsBar() {
         console.error("Failed to load public stats:", err);
       }
     };
-
     fetchStats();
   }, []);
-
   const stats = [
     { value: data.totalUrls, suffix: "+", label: "Links Shortened", Icon: Link2 },
     { value: data.totalClicks, suffix: "+", label: "Clicks Tracked", Icon: MousePointerClick },
     { value: data.totalUsers, suffix: "+", label: "Happy Users", Icon: Users },
     { value: data.activeUrls, suffix: "+", label: "Active Links", Icon: TrendingUp },
   ];
-
   return (
     <section id="stats" className="py-20 px-5 sm:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="gradient-border-card p-0 overflow-hidden shadow-card">
-          {/* Top bar */}
+          {}
           <div className="h-px bg-linear-to-r from-transparent via-white/12 to-transparent" />
-
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
             {stats.map((stat, i) => {
               const Icon = stat.Icon;

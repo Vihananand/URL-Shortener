@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Modal from "@/components/ui/Modal";
@@ -9,13 +8,11 @@ import type { ShortenedUrl } from "@/types";
 import { APP_DOMAIN } from "@/lib/site";
 import { ChevronDown, ShieldCheck, Clock, MousePointer2, Settings2, ShieldAlert, ArrowRight, Lock } from "lucide-react";
 import Link from "next/link";
-
 interface CreateUrlModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: (url: ShortenedUrl) => void;
 }
-
 export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrlModalProps) {
   const [longUrl, setLongUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
@@ -26,7 +23,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ longUrl?: string; customSlug?: string }>({});
-
   const validate = () => {
     const errs: typeof errors = {};
     if (!longUrl.trim()) {
@@ -40,15 +36,12 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
     }
     return errs;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-
     setLoading(true);
     setErrors({});
-
     try {
       const normalised = longUrl.startsWith("http") ? longUrl : `https://${longUrl}`;
       const res = await fetch("/api/urls", {
@@ -63,15 +56,12 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
           password: password || undefined,
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setErrors({ longUrl: data.message || "Failed to create URL" });
         setLoading(false);
         return;
       }
-
       onCreated(data.url);
       setLongUrl("");
       setCustomSlug("");
@@ -87,7 +77,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
       setLoading(false);
     }
   };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create new link">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -105,7 +94,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
           }
           autoFocus
         />
-
         <div>
           <Input
             label="Custom slug (optional)"
@@ -130,8 +118,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
             </motion.p>
           )}
         </div>
-
-        {/* Advanced Options Toggle */}
+        {}
         <div>
           <button
             type="button"
@@ -144,7 +131,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
               <ChevronDown size={16} />
             </motion.div>
           </button>
-
           <AnimatePresence>
             {showAdvanced && (
               <motion.div
@@ -154,7 +140,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                 className="overflow-hidden"
               >
                 <div className="pt-4 flex flex-col gap-4 border-t border-white/5 mt-4">
-                  {/* Security Info */}
+                  {}
                   <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/20 rounded-md">
@@ -166,8 +152,7 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                       </div>
                     </div>
                   </div>
-
-                  {/* 24h Expiry Toggle */}
+                  {}
                   <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-white/10 rounded-md">
@@ -191,7 +176,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                       <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-zinc-900 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white peer-checked:after:bg-zinc-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                   </div>
-
                   {!deleteAfter24h && (
                     <Input
                       label="Custom Expiry Date & Time (Optional)"
@@ -201,7 +185,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                       icon={<Clock size={16} strokeWidth={2} />}
                     />
                   )}
-
                   <Input
                     label="Maximum Clicks (Optional)"
                     type="number"
@@ -211,7 +194,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
                     onChange={(e) => setMaxClicks(e.target.value)}
                     icon={<MousePointer2 size={16} strokeWidth={2} />}
                   />
-
                   <Input
                     label="Password Protection (Optional)"
                     type="text"
@@ -225,7 +207,6 @@ export default function CreateUrlModal({ isOpen, onClose, onCreated }: CreateUrl
             )}
           </AnimatePresence>
         </div>
-
         <div className="flex flex-col-reverse sm:flex-row items-center gap-3 pt-4">
           <Button
             variant="ghost"

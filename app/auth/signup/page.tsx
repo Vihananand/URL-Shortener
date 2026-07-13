@@ -1,5 +1,4 @@
 "use client";
-
 import "@/app/auth/auth.css";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { showToast } from "@/components/ui/Toast";
 import { Link2, User, Mail, Lock, ShieldCheck } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-
 function PasswordStrength({ password }: { password: string }) {
   const strength = (() => {
     if (!password) return 0;
@@ -21,7 +19,6 @@ function PasswordStrength({ password }: { password: string }) {
     if (/[^A-Za-z0-9]/.test(password)) s++;
     return s;
   })();
-
   const labels = ["", "Weak", "Fair", "Good", "Strong"];
   const barColors = [
     "",
@@ -30,9 +27,7 @@ function PasswordStrength({ password }: { password: string }) {
     "bg-white/60",
     "bg-white",
   ];
-
   if (!password) return null;
-
   return (
     <div className="mt-2">
       <div className="flex gap-1 mb-1">
@@ -49,7 +44,6 @@ function PasswordStrength({ password }: { password: string }) {
     </div>
   );
 }
-
 export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,9 +51,7 @@ export default function SignUpPage() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const router = useRouter();
-
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Name is required.";
@@ -73,7 +65,6 @@ export default function SignUpPage() {
     else if (confirm !== password) e.confirm = "Passwords do not match.";
     return e;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
@@ -81,7 +72,6 @@ export default function SignUpPage() {
       setErrors(errs);
       return;
     }
-
     setLoading(true);
     setErrors({});
     const res = await fetch("/api/signup", {
@@ -91,9 +81,7 @@ export default function SignUpPage() {
       },
       body: JSON.stringify({ name, email, password }),
     });
-
     const data = await res.json();
-
     if (!res.ok) {
       setErrors({ general: data.message });
       setLoading(false);
@@ -108,7 +96,6 @@ export default function SignUpPage() {
       });
       return;
     }
-
     router.push(`/auth/signin`);
     showToast.success(`${data.message}`, {
       duration: 4000,
@@ -119,7 +106,6 @@ export default function SignUpPage() {
       sound: true
     });
   };
-
   const handleGoogleSuccess = async (credentialResponse: any) => {
     setLoading(true);
     setErrors({});
@@ -130,13 +116,11 @@ export default function SignUpPage() {
         body: JSON.stringify({ credential: credentialResponse.credential }),
       });
       const data = await res.json();
-      
       if (!res.ok) {
         showToast.error(data.message || "Google authentication failed");
         setLoading(false);
         return;
       }
-      
       router.push(`/dashboard/${data.user.full_name}`);
       showToast.success("Successfully signed up and authenticated with Google");
     } catch (err) {
@@ -144,22 +128,19 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
-
   const clearErr = (field: string) =>
     setErrors((p) => {
       const n = { ...p };
       delete n[field];
       return n;
     });
-
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-16 relative overflow-hidden">
-      {/* Background */}
+      {}
       <div className="absolute inset-0 dot-bg pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none auth-gradient-bg" />
-
       <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -175,7 +156,6 @@ export default function SignUpPage() {
           <h1 className="text-2xl font-bold text-white tracking-tight">Create your account</h1>
           <p className="text-sm text-white/40 mt-1.5">Start shortening links for free</p>
         </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -194,7 +174,6 @@ export default function SignUpPage() {
               autoFocus
               autoComplete="name"
             />
-
             <Input
               label="Email address"
               type="email"
@@ -205,7 +184,6 @@ export default function SignUpPage() {
               icon={<Mail size={15} strokeWidth={1.8} />}
               autoComplete="email"
             />
-
             <div>
               <Input
                 label="Password"
@@ -219,7 +197,6 @@ export default function SignUpPage() {
               />
               <PasswordStrength password={password} />
             </div>
-
             <Input
               label="Confirm password"
               type="password"
@@ -230,18 +207,15 @@ export default function SignUpPage() {
               icon={<ShieldCheck size={15} strokeWidth={1.8} />}
               autoComplete="new-password"
             />
-
             <Button variant="primary" type="submit" loading={loading} size="lg" className="w-full mt-2">
               {loading ? "Creating account…" : "Create free account"}
             </Button>
           </form>
-
           <div className="mt-6 mb-4 flex items-center justify-center gap-3">
             <div className="h-px bg-white/10 flex-1" />
             <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold">Or continue with</span>
             <div className="h-px bg-white/10 flex-1" />
           </div>
-
           <div className="flex justify-center mt-4">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
@@ -251,7 +225,6 @@ export default function SignUpPage() {
               text="signup_with"
             />
           </div>
-
           <div className="mt-5 pt-5 border-t border-border text-center">
             <p className="text-sm text-white/40">
               Already have an account?{" "}
@@ -261,7 +234,6 @@ export default function SignUpPage() {
             </p>
           </div>
         </motion.div>
-
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

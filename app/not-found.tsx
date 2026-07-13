@@ -1,22 +1,19 @@
 "use client";
-
 import { motion } from "motion/react";
 import Link from "next/link";
-
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center justify-center px-4 text-center relative overflow-hidden">
-      {/* Background blobs */}
+      {}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 blob bg-primary/10 animate-blob pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 blob bg-secondary/10 animate-blob animation-delay-2000 pointer-events-none" />
-
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative z-10"
       >
-        {/* 404 Number */}
+        {}
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -25,7 +22,6 @@ export default function NotFound() {
         >
           404
         </motion.div>
-
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -34,7 +30,6 @@ export default function NotFound() {
         >
           This link doesn&apos;t exist
         </motion.h2>
-
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,7 +39,6 @@ export default function NotFound() {
           The page you&apos;re looking for has been moved, deleted, or the URL
           was mistyped.
         </motion.p>
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

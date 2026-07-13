@@ -1,23 +1,18 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-
 interface CopyButtonProps {
   text: string;
   className?: string;
 }
-
 export default function CopyButton({ text, className = "" }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
       const el = document.createElement("textarea");
       el.value = text;
       document.body.appendChild(el);
@@ -28,7 +23,6 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
   return (
     <motion.button
       onClick={handleCopy}

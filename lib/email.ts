@@ -1,11 +1,9 @@
 import { Resend } from 'resend';
-
 const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy");
-
 export async function sendEmailOTP(email: string, otp: string) {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'URL Shortener <onboarding@resend.dev>', // Update this when deploying to a domain
+      from: 'URL Shortener <onboarding@resend.dev>', 
       to: [email],
       subject: 'Your 2FA Login Code',
       html: `
@@ -19,12 +17,10 @@ export async function sendEmailOTP(email: string, otp: string) {
         </div>
       `,
     });
-
     if (error) {
       console.error('Error sending email:', error);
       return false;
     }
-    
     return true;
   } catch (error) {
     console.error('Error in sendEmailOTP:', error);

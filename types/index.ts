@@ -7,7 +7,6 @@ export interface ShortenedUrl {
   createdAt: string;
   isActive: boolean;
 }
-
 export interface DashboardStats {
   totalUrls: number;
   totalClicks: number;

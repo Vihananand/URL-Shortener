@@ -1,13 +1,10 @@
 import { cn } from "@/lib/utils";
-
 type BadgeVariant = "active" | "inactive" | "info" | "warning";
-
 interface BadgeProps {
   variant?: BadgeVariant;
   children: React.ReactNode;
   className?: string;
 }
-
 const variantClasses: Record<BadgeVariant, string> = {
   active:
     "bg-green-500/15 text-green-500 border border-green-500/30",
@@ -18,7 +15,6 @@ const variantClasses: Record<BadgeVariant, string> = {
   warning:
     "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30",
 };
-
 export default function Badge({
   variant = "info",
   children,
